@@ -1,6 +1,8 @@
 package com.adaptivelearning.repository;
 
 import com.adaptivelearning.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
@@ -9,6 +11,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class DataStore {
+
+    private static final Logger logger = LoggerFactory.getLogger(DataStore.class);
+
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final CompetencyRepository competencyRepository;
+    private final LearningPathRepository learningPathRepository;
+    private final ModuleRepository moduleRepository;
+    private final QuizRepository quizRepository;
+    private final QuizResultRepository quizResultRepository;
+    private final ProgressRecordRepository progressRecordRepository;
 
     private final Map<String, User> users = new ConcurrentHashMap<>();
     private final Map<String, Role> roles = new ConcurrentHashMap<>();
@@ -20,31 +33,99 @@ public class DataStore {
     private final Map<String, List<ProgressRecord>> userProgress = new ConcurrentHashMap<>();
     private final Map<String, String> passwordsByUserId = new ConcurrentHashMap<>();
 
+    public DataStore(UserRepository userRepository,
+                     RoleRepository roleRepository,
+                     CompetencyRepository competencyRepository,
+                     LearningPathRepository learningPathRepository,
+                     ModuleRepository moduleRepository,
+                     QuizRepository quizRepository,
+                     QuizResultRepository quizResultRepository,
+                     ProgressRecordRepository progressRecordRepository) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.competencyRepository = competencyRepository;
+        this.learningPathRepository = learningPathRepository;
+        this.moduleRepository = moduleRepository;
+        this.quizRepository = quizRepository;
+        this.quizResultRepository = quizResultRepository;
+        this.progressRecordRepository = progressRecordRepository;
+    }
+
     @PostConstruct
     public void init() {
         seedRolesAndCompetencies();
         seedDemoUser();
+        loadFromMongoDB();
+    }
+
+    private void loadFromMongoDB() {
+        try {
+            logger.info("Synchronizing data with MongoDB Atlas...");
+            userRepository.findAll().forEach(u -> {
+                users.put(u.getId(), u);
+                if (u.getPassword() != null) {
+                    passwordsByUserId.put(u.getId(), u.getPassword());
+                }
+            });
+            roleRepository.findAll().forEach(r -> roles.put(r.getId(), r));
+            competencyRepository.findAll().forEach(c -> {
+                competencies.put(c.getId(), c);
+                competencies.put(c.getName(), c);
+            });
+            learningPathRepository.findAll().forEach(lp -> {
+                learningPaths.put(pathKey(lp.getUserId(), lp.getRoleId()), lp);
+                if (lp.getModules() != null) {
+                    lp.getModules().forEach(m -> modules.put(m.getId(), m));
+                }
+            });
+            moduleRepository.findAll().forEach(m -> modules.put(m.getId(), m));
+            quizRepository.findAll().forEach(q -> quizzes.put(q.getId(), q));
+            quizResultRepository.findAll().forEach(qr -> {
+                if (qr.getQuizId() != null) {
+                    quizResults.put(qr.getQuizId(), qr);
+                }
+            });
+            progressRecordRepository.findAll().forEach(pr -> {
+                if (pr.getUserId() != null) {
+                    userProgress.computeIfAbsent(pr.getUserId(), k -> new ArrayList<>()).add(pr);
+                }
+            });
+            logger.info("MongoDB Atlas synchronization complete. Loaded {} users, {} roles, {} competencies.",
+                    users.size(), roles.size(), competencies.size());
+        } catch (Exception e) {
+            logger.warn("Could not sync directly with MongoDB Atlas on startup ({}). Local cache initialized.", e.getMessage());
+        }
     }
 
     private void seedDemoUser() {
-        User demoUser = new User("user-demo-1", "demo@adaptiq.io", "Alex Chen");
-        demoUser.setRoleId("role-frontend-engineer");
-        demoUser.setRoleName("Frontend Architect");
-        demoUser.setOverallLevel("INTERMEDIATE");
-        demoUser.setCompetencyLevels(new HashMap<>(Map.of(
-                "HTML5 & Modern CSS", "EXPERT",
-                "JavaScript & TypeScript", "INTERMEDIATE",
-                "React & State Architecture", "INTERMEDIATE",
-                "Web Performance & Core Web Vitals", "NOVICE"
-        )));
-        demoUser.setCompetencyScores(new HashMap<>(Map.of(
-                "HTML5 & Modern CSS", 90,
-                "JavaScript & TypeScript", 75,
-                "React & State Architecture", 80,
-                "Web Performance & Core Web Vitals", 55
-        )));
-        users.put(demoUser.getId(), demoUser);
-        passwordsByUserId.put(demoUser.getId(), "demo1234");
+        try {
+            User demoUser = new User("user-demo-1", "demo@adaptiq.io", "Alex Chen");
+            demoUser.setPassword("demo1234");
+            demoUser.setRoleId("role-frontend-engineer");
+            demoUser.setRoleName("Frontend Architect");
+            demoUser.setOverallLevel("INTERMEDIATE");
+            demoUser.setCompetencyLevels(new HashMap<>(Map.of(
+                    "HTML5 & Modern CSS", "EXPERT",
+                    "JavaScript & TypeScript", "INTERMEDIATE",
+                    "React & State Architecture", "INTERMEDIATE",
+                    "Web Performance & Core Web Vitals", "NOVICE"
+            )));
+            demoUser.setCompetencyScores(new HashMap<>(Map.of(
+                    "HTML5 & Modern CSS", 90,
+                    "JavaScript & TypeScript", 75,
+                    "React & State Architecture", 80,
+                    "Web Performance & Core Web Vitals", 55
+            )));
+            users.put(demoUser.getId(), demoUser);
+            passwordsByUserId.put(demoUser.getId(), "demo1234");
+
+            if (userRepository != null && userRepository.findById(demoUser.getId()).isEmpty()) {
+                userRepository.save(demoUser);
+                logger.info("Seeded default demo user 'user-demo-1' into MongoDB Atlas.");
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to seed demo user to MongoDB: {}", e.getMessage());
+        }
     }
 
     private void seedRolesAndCompetencies() {
@@ -104,33 +185,9 @@ public class DataStore {
         ));
 
         // Roles
-        roles.put("role-frontend-engineer", new Role(
-                "role-frontend-engineer",
-                "Frontend Architect",
-                "Frontend Engineering",
-                "Designs high-performance, accessible, and scalable web interfaces using modern frameworks and performance optimization.",
-                "Code",
-                List.of("HTML5 & Modern CSS", "JavaScript & TypeScript", "React & State Architecture", "Web Performance & Core Web Vitals")
-        ));
-
-        roles.put("role-fullstack-cloud", new Role(
-                "role-fullstack-cloud",
-                "Full Stack Cloud Developer",
-                "Software Engineering",
-                "Builds end-to-end resilient applications spanning modern React frontends, robust Spring Boot APIs, and cloud microservices.",
-                "Layers",
-                List.of("JavaScript & TypeScript", "React & State Architecture", "Cloud APIs & Microservices", "Web Performance & Core Web Vitals")
-        ));
-
-        roles.put("role-ai-engineer", new Role(
-                "role-ai-engineer",
-                "AI & Prompt Systems Engineer",
-                "Artificial Intelligence",
-                "Integrates generative AI models, builds intelligent agent workflows, and automates context-aware enterprise systems.",
-                "Brain",
-                List.of("AI Engineering & LLM Integration", "JavaScript & TypeScript", "Cloud APIs & Microservices")
-        ));
-
+        addRole("role-frontend-engineer", "Frontend Architect", "Frontend Engineering", "Designs high-performance, accessible, and scalable web interfaces using modern frameworks and performance optimization.", "Code", List.of("HTML5 & Modern CSS", "JavaScript & TypeScript", "React & State Architecture", "Web Performance & Core Web Vitals"));
+        addRole("role-fullstack-cloud", "Full Stack Cloud Developer", "Software Engineering", "Builds end-to-end resilient applications spanning modern React frontends, robust Spring Boot APIs, and cloud microservices.", "Layers", List.of("JavaScript & TypeScript", "React & State Architecture", "Cloud APIs & Microservices", "Web Performance & Core Web Vitals"));
+        addRole("role-ai-engineer", "AI & Prompt Systems Engineer", "Artificial Intelligence", "Integrates generative AI models, builds intelligent agent workflows, and automates context-aware enterprise systems.", "Brain", List.of("AI Engineering & LLM Integration", "JavaScript & TypeScript", "Cloud APIs & Microservices"));
         addRole("role-backend-engineer", "Backend Engineer", "Software Engineering", "Builds reliable APIs, services, and data access layers.", "Code", List.of("Cloud APIs & Microservices", "JavaScript & TypeScript", "AI Engineering & LLM Integration"));
         addRole("role-java-developer", "Java Developer", "Software Engineering", "Develops maintainable Java services with Spring Boot and production testing practices.", "Code", List.of("Cloud APIs & Microservices", "JavaScript & TypeScript", "Web Performance & Core Web Vitals"));
         addRole("role-devops-engineer", "DevOps Engineer", "Cloud Engineering", "Automates delivery, observability, reliability, and scalable cloud operations.", "Layers", List.of("Cloud APIs & Microservices", "Web Performance & Core Web Vitals", "AI Engineering & LLM Integration"));
@@ -138,15 +195,29 @@ public class DataStore {
         addRole("role-qa-engineer", "QA Automation Engineer", "Quality Engineering", "Creates automated test strategies that protect product quality across web and API workflows.", "Code", List.of("JavaScript & TypeScript", "Cloud APIs & Microservices", "Web Performance & Core Web Vitals"));
         addRole("role-security-engineer", "Security Engineer", "Security Engineering", "Builds secure application and service architectures with practical threat controls.", "Brain", List.of("Cloud APIs & Microservices", "JavaScript & TypeScript", "AI Engineering & LLM Integration"));
         addRole("role-product-engineer", "Product Engineer", "Product Engineering", "Turns user needs into polished, measurable, and maintainable product experiences.", "Code", List.of("React & State Architecture", "JavaScript & TypeScript", "Web Performance & Core Web Vitals"));
+
+        // Persist initial competencies and roles into MongoDB if not present
+        try {
+            if (competencyRepository != null && competencyRepository.count() == 0) {
+                competencyRepository.saveAll(new HashSet<>(competencies.values()));
+                logger.info("Seeded competencies into MongoDB Atlas.");
+            }
+            if (roleRepository != null && roleRepository.count() == 0) {
+                roleRepository.saveAll(roles.values());
+                logger.info("Seeded roles into MongoDB Atlas.");
+            }
+        } catch (Exception e) {
+            logger.warn("Could not seed roles/competencies to MongoDB: {}", e.getMessage());
+        }
     }
 
-    private void addRole(String id, String name, String category, String description, String icon, List<String> competencies) {
-        roles.put(id, new Role(id, name, category, description, icon, competencies));
+    private void addRole(String id, String name, String category, String description, String icon, List<String> compList) {
+        Role role = new Role(id, name, category, description, icon, compList);
+        roles.put(id, role);
     }
 
     private void addCompetency(Competency comp) {
         competencies.put(comp.getId(), comp);
-        // Also map by name for quick lookup
         competencies.put(comp.getName(), comp);
     }
 
@@ -161,46 +232,157 @@ public class DataStore {
     public Map<String, List<ProgressRecord>> getUserProgress() { return userProgress; }
 
     public User getUser(String userId) {
-        return users.get(userId);
+        User user = users.get(userId);
+        if (user == null && userRepository != null) {
+            try {
+                Optional<User> dbUser = userRepository.findById(userId);
+                if (dbUser.isPresent()) {
+                    user = dbUser.get();
+                    users.put(userId, user);
+                    if (user.getPassword() != null) {
+                        passwordsByUserId.put(userId, user.getPassword());
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Error fetching user {} from MongoDB: {}", userId, e.getMessage());
+            }
+        }
+        return user;
     }
 
     public User getUserByEmail(String email) {
-        return users.values().stream()
-                .filter(user -> user.getEmail() != null && user.getEmail().equalsIgnoreCase(email))
+        if (email == null) return null;
+        User cached = users.values().stream()
+                .filter(u -> u.getEmail() != null && u.getEmail().equalsIgnoreCase(email))
                 .findFirst()
                 .orElse(null);
+        if (cached != null) return cached;
+
+        if (userRepository != null) {
+            try {
+                Optional<User> dbUser = userRepository.findByEmailIgnoreCase(email);
+                if (dbUser.isPresent()) {
+                    User user = dbUser.get();
+                    users.put(user.getId(), user);
+                    if (user.getPassword() != null) {
+                        passwordsByUserId.put(user.getId(), user.getPassword());
+                    }
+                    return user;
+                }
+            } catch (Exception e) {
+                logger.warn("Error fetching user by email {} from MongoDB: {}", email, e.getMessage());
+            }
+        }
+        return null;
     }
 
     public void setPassword(String userId, String password) {
         passwordsByUserId.put(userId, password);
+        User user = getUser(userId);
+        if (user != null) {
+            user.setPassword(password);
+            saveUser(user);
+        }
     }
 
     public boolean passwordMatches(String userId, String password) {
-        return password != null && password.equals(passwordsByUserId.get(userId));
+        if (password == null) return false;
+        String stored = passwordsByUserId.get(userId);
+        if (stored == null) {
+            User user = getUser(userId);
+            if (user != null && user.getPassword() != null) {
+                stored = user.getPassword();
+                passwordsByUserId.put(userId, stored);
+            }
+        }
+        return password.equals(stored);
     }
 
     public void saveUser(User user) {
         users.put(user.getId(), user);
+        if (user.getPassword() != null) {
+            passwordsByUserId.put(user.getId(), user.getPassword());
+        }
+        if (userRepository != null) {
+            try {
+                userRepository.save(user);
+            } catch (Exception e) {
+                logger.warn("Could not persist user {} to MongoDB: {}", user.getId(), e.getMessage());
+            }
+        }
     }
 
     public Role getRole(String roleId) {
-        return roles.get(roleId);
+        Role role = roles.get(roleId);
+        if (role == null && roleRepository != null) {
+            try {
+                Optional<Role> dbRole = roleRepository.findById(roleId);
+                if (dbRole.isPresent()) {
+                    role = dbRole.get();
+                    roles.put(roleId, role);
+                }
+            } catch (Exception e) {
+                logger.warn("Could not fetch role {} from MongoDB: {}", roleId, e.getMessage());
+            }
+        }
+        return role;
     }
 
     public Quiz getQuiz(String quizId) {
-        return quizzes.get(quizId);
+        Quiz quiz = quizzes.get(quizId);
+        if (quiz == null && quizRepository != null) {
+            try {
+                Optional<Quiz> dbQuiz = quizRepository.findById(quizId);
+                if (dbQuiz.isPresent()) {
+                    quiz = dbQuiz.get();
+                    quizzes.put(quizId, quiz);
+                }
+            } catch (Exception e) {
+                logger.warn("Could not fetch quiz {} from MongoDB: {}", quizId, e.getMessage());
+            }
+        }
+        return quiz;
     }
 
     public void saveQuiz(Quiz quiz) {
         quizzes.put(quiz.getId(), quiz);
+        if (quizRepository != null) {
+            try {
+                quizRepository.save(quiz);
+            } catch (Exception e) {
+                logger.warn("Could not persist quiz {} to MongoDB: {}", quiz.getId(), e.getMessage());
+            }
+        }
     }
 
     public QuizResult getQuizResult(String quizId) {
-        return quizResults.get(quizId);
+        QuizResult qr = quizResults.get(quizId);
+        if (qr == null && quizResultRepository != null) {
+            try {
+                Optional<QuizResult> dbResult = quizResultRepository.findByQuizId(quizId);
+                if (dbResult.isPresent()) {
+                    qr = dbResult.get();
+                    quizResults.put(quizId, qr);
+                }
+            } catch (Exception e) {
+                logger.warn("Could not fetch quiz result {} from MongoDB: {}", quizId, e.getMessage());
+            }
+        }
+        return qr;
     }
 
     public void saveQuizResult(QuizResult result) {
+        if (result.getId() == null) {
+            result.setId(result.getQuizId() != null ? result.getQuizId() : UUID.randomUUID().toString());
+        }
         quizResults.put(result.getQuizId(), result);
+        if (quizResultRepository != null) {
+            try {
+                quizResultRepository.save(result);
+            } catch (Exception e) {
+                logger.warn("Could not persist quiz result to MongoDB: {}", e.getMessage());
+            }
+        }
     }
 
     public LearningPath getLearningPathByUserId(String userId) {
@@ -209,13 +391,41 @@ public class DataStore {
     }
 
     public LearningPath getLearningPathByUserIdAndRole(String userId, String roleId) {
-        return learningPaths.get(pathKey(userId, roleId));
+        String key = pathKey(userId, roleId);
+        LearningPath lp = learningPaths.get(key);
+        if (lp == null && learningPathRepository != null) {
+            try {
+                Optional<LearningPath> dbPath = learningPathRepository.findByUserIdAndRoleId(userId, roleId);
+                if (dbPath.isPresent()) {
+                    lp = dbPath.get();
+                    learningPaths.put(key, lp);
+                    if (lp.getModules() != null) {
+                        lp.getModules().forEach(m -> modules.put(m.getId(), m));
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Could not fetch learning path from MongoDB: {}", e.getMessage());
+            }
+        }
+        return lp;
     }
 
     public void saveLearningPath(LearningPath path) {
         learningPaths.put(pathKey(path.getUserId(), path.getRoleId()), path);
-        for (LearningModule m : path.getModules()) {
-            modules.put(m.getId(), m);
+        if (path.getModules() != null) {
+            for (LearningModule m : path.getModules()) {
+                modules.put(m.getId(), m);
+            }
+        }
+        if (learningPathRepository != null) {
+            try {
+                learningPathRepository.save(path);
+                if (path.getModules() != null && moduleRepository != null) {
+                    moduleRepository.saveAll(path.getModules());
+                }
+            } catch (Exception e) {
+                logger.warn("Could not persist learning path to MongoDB: {}", e.getMessage());
+            }
         }
     }
 
@@ -224,23 +434,71 @@ public class DataStore {
     }
 
     public LearningModule getModule(String moduleId) {
-        return modules.get(moduleId);
+        LearningModule m = modules.get(moduleId);
+        if (m == null && moduleRepository != null) {
+            try {
+                Optional<LearningModule> dbMod = moduleRepository.findById(moduleId);
+                if (dbMod.isPresent()) {
+                    m = dbMod.get();
+                    modules.put(moduleId, m);
+                }
+            } catch (Exception e) {
+                logger.warn("Could not fetch module {} from MongoDB: {}", moduleId, e.getMessage());
+            }
+        }
+        return m;
     }
 
     public Collection<LearningModule> getAllModules() {
+        if (moduleRepository != null && modules.isEmpty()) {
+            try {
+                moduleRepository.findAll().forEach(m -> modules.put(m.getId(), m));
+            } catch (Exception e) {
+                logger.warn("Could not fetch all modules from MongoDB: {}", e.getMessage());
+            }
+        }
         return modules.values();
     }
 
     public void saveModule(LearningModule module) {
         modules.put(module.getId(), module);
+        if (moduleRepository != null) {
+            try {
+                moduleRepository.save(module);
+            } catch (Exception e) {
+                logger.warn("Could not persist module {} to MongoDB: {}", module.getId(), e.getMessage());
+            }
+        }
     }
 
     public List<ProgressRecord> getProgressForUser(String userId) {
+        List<ProgressRecord> list = userProgress.get(userId);
+        if ((list == null || list.isEmpty()) && progressRecordRepository != null) {
+            try {
+                List<ProgressRecord> dbRecords = progressRecordRepository.findByUserId(userId);
+                if (dbRecords != null && !dbRecords.isEmpty()) {
+                    userProgress.put(userId, new ArrayList<>(dbRecords));
+                    return dbRecords;
+                }
+            } catch (Exception e) {
+                logger.warn("Could not fetch progress records from MongoDB: {}", e.getMessage());
+            }
+        }
         return userProgress.computeIfAbsent(userId, k -> new ArrayList<>());
     }
 
     public void addProgressRecord(ProgressRecord record) {
+        if (record.getId() == null) {
+            record.setId("pr-" + UUID.randomUUID().toString().substring(0, 8));
+        }
         List<ProgressRecord> list = userProgress.computeIfAbsent(record.getUserId(), k -> new ArrayList<>());
         list.add(record);
+        if (progressRecordRepository != null) {
+            try {
+                progressRecordRepository.save(record);
+            } catch (Exception e) {
+                logger.warn("Could not persist progress record to MongoDB: {}", e.getMessage());
+            }
+        }
     }
 }

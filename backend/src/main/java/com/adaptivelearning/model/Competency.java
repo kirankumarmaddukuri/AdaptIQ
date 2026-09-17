@@ -1,9 +1,14 @@
 package com.adaptivelearning.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@Document(collection = "competencies")
 public class Competency {
+    @Id
     private String id;
     private String name;
     private String description;

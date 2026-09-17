@@ -412,7 +412,7 @@ export default function App() {
             <span>•</span>
             <span>AI model: {systemInfo.geminiModel || 'Configured by backend'}</span>
             <span>•</span>
-            <span>Spring Boot 3 + React + Firebase</span>
+            <span>Spring Boot 3 + React + MongoDB Atlas</span>
           </div>
         </footer>
       </div>

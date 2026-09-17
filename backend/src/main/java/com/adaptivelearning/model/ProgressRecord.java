@@ -1,8 +1,13 @@
 package com.adaptivelearning.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 
+@Document(collection = "progress_records")
 public class ProgressRecord {
+    @Id
     private String id;
     private String userId;
     private String moduleId;

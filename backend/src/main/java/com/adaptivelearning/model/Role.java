@@ -1,9 +1,14 @@
 package com.adaptivelearning.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Document(collection = "roles")
 public class Role {
+    @Id
     private String id;
     private String name;
     private String category;

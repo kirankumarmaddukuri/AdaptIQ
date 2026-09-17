@@ -1,15 +1,21 @@
 package com.adaptivelearning.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Document(collection = "users")
 public class User {
+    @Id
     private String id;
     private String email;
     private String displayName;
+    private String password;
     private String roleId;
     private String roleName;
     private String overallLevel; // "UNASSESSED", "NOVICE", "INTERMEDIATE", "EXPERT"
@@ -74,6 +80,9 @@ public class User {
 
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public String getRoleId() { return roleId; }
     public void setRoleId(String roleId) { this.roleId = roleId; }
