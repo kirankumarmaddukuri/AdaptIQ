@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import CheckpointModal from './components/CheckpointModal';
 import AeroShards from './components/AeroShards';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import RoleSelection from './pages/RoleSelection';
 import QuizView from './pages/QuizView';
@@ -12,12 +13,15 @@ import Dashboard from './pages/Dashboard';
 import NotFound from './components/NotFound';
 import { api } from './api';
 
+// Protected routes that require an authenticated user
+const PROTECTED_PREFIXES = ['/dashboard', '/learning-path', '/quiz', '/result', '/module'];
+
 // Route matching and resolution helper
 const parseRoute = (rawPath, hasUser = false) => {
   const clean = rawPath.replace(/\/+$/, '') || '/';
   
   if (clean === '/' || clean === '') {
-    return { tab: hasUser ? 'dashboard' : 'login', mode: 'login', path: clean };
+    return { tab: 'landing', path: '/' };
   }
   if (clean === '/login') {
     return { tab: 'login', mode: 'login', path: clean };
@@ -25,11 +29,23 @@ const parseRoute = (rawPath, hasUser = false) => {
   if (clean === '/register' || clean === '/signup') {
     return { tab: 'login', mode: 'register', path: clean };
   }
-  if (clean === '/dashboard') {
-    return { tab: 'dashboard', path: clean };
-  }
   if (clean === '/roles') {
     return { tab: 'roles', path: clean };
+  }
+
+  // Guard protected routes against unauthenticated access
+  const isProtected = PROTECTED_PREFIXES.some(prefix => clean === prefix || clean.startsWith(prefix + '/'));
+  if (isProtected && !hasUser) {
+    return {
+      tab: 'login',
+      mode: 'login',
+      path: '/login',
+      authNotice: 'Please sign in or create an account to start your adaptive diagnostic assessment and access your learning path.'
+    };
+  }
+
+  if (clean === '/dashboard') {
+    return { tab: 'dashboard', path: clean };
   }
   if (clean === '/learning-path') {
     return { tab: 'learning-path', path: clean };
@@ -46,7 +62,7 @@ const parseRoute = (rawPath, hasUser = false) => {
     return { tab: 'module', moduleId: modId, path: clean };
   }
 
-  // Any other route (e.g. /role, /users, /admin, /test) is an invalid endpoint
+  // Any other unrecognized route is a 404
   return { tab: '404', invalidPath: rawPath, path: clean };
 };
 
@@ -65,6 +81,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(initialRoute.tab);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [loginInitialMode, setLoginInitialMode] = useState(initialRoute.mode || 'login');
+  const [authNotice, setAuthNotice] = useState(initialRoute.authNotice || '');
+  const [preselectedRoleId, setPreselectedRoleId] = useState('');
   const [activeModuleId, setActiveModuleId] = useState(initialRoute.moduleId || null);
 
   const [activeRole, setActiveRole] = useState(null);
@@ -86,6 +104,7 @@ export default function App() {
       setCurrentPath(window.location.pathname);
       setActiveTab(route.tab);
       if (route.mode) setLoginInitialMode(route.mode);
+      if (route.authNotice) setAuthNotice(route.authNotice);
       if (route.moduleId) setActiveModuleId(route.moduleId);
     };
 
@@ -93,9 +112,28 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [currentUser]);
 
-  // Central navigation handler that updates tab and pushes URL history
-  const handleNavigate = (tab, explicitPath = null, replace = false) => {
+  // Central navigation handler that updates tab, pushes URL history, and guards protected tabs
+  const handleNavigate = (tab, explicitPath = null, replace = false, notice = '', roleId = '') => {
+    const protectedTabs = ['dashboard', 'learning-path', 'quiz', 'result', 'module'];
+
+    // Enforce authentication guard
+    if (!currentUser && protectedTabs.includes(tab)) {
+      setAuthNotice(notice || 'Please sign in or create an account to start your adaptive diagnostic assessment and access your learning path.');
+      if (roleId) setPreselectedRoleId(roleId);
+      tab = 'login';
+      setLoginInitialMode('register');
+      explicitPath = '/register';
+    } else {
+      if (notice) {
+        setAuthNotice(notice);
+      } else {
+        setAuthNotice('');
+      }
+      if (roleId) setPreselectedRoleId(roleId);
+    }
+
     const tabToPath = {
+      'landing': '/',
       'login': '/login',
       'register': '/register',
       'dashboard': '/dashboard',
@@ -111,8 +149,10 @@ export default function App() {
     if (tab === 'register') {
       tab = 'login';
       setLoginInitialMode('register');
+      targetPath = '/register';
     } else if (tab === 'login') {
       setLoginInitialMode('login');
+      targetPath = '/login';
     }
 
     if (window.location.pathname !== targetPath && tab !== '404') {
@@ -132,14 +172,16 @@ export default function App() {
     setActiveRole(null);
     setLastQuizResult(null);
     setActiveModuleId(null);
+    setAuthNotice('');
     try {
       localStorage.removeItem('adaptiq_user');
     } catch {}
-    handleNavigate('login', '/login');
+    handleNavigate('landing', '/', false);
   };
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
+    setAuthNotice('');
     try {
       localStorage.setItem('adaptiq_user', JSON.stringify(user));
     } catch {}
@@ -151,31 +193,21 @@ export default function App() {
     }
   };
 
-  const handleSelectRole = (role, attempted) => {
-    setActiveRole(role);
-    if (currentUser) {
-      const updated = {
-        ...currentUser,
-        roleId: role.id,
-        roleName: role.name
-      };
-      setCurrentUser(updated);
-      try {
-        localStorage.setItem('adaptiq_user', JSON.stringify(updated));
-      } catch {}
+  const handleSelectRole = (role, existingAttempt = null) => {
+    if (!currentUser) {
+      handleNavigate(
+        'register',
+        '/register',
+        false,
+        `Create a free profile to take your adaptive diagnostic assessment for ${role.name}!`,
+        role.id
+      );
+      return;
     }
-    if (attempted) {
-      setLastQuizResult({
-        userId: currentUser?.id,
-        roleName: attempted.roleName,
-        overallScorePercentage: attempted.overallScore,
-        overallLevel: attempted.resultLevel,
-        correctAnswers: attempted.correctAnswers,
-        totalQuestions: attempted.totalQuestions,
-        questionReviews: attempted.questionReviews || [],
-        scoreByCompetency: {},
-        aiFeedback: 'This is your saved result for this career track.'
-      });
+
+    setActiveRole(role);
+    if (existingAttempt) {
+      setLastQuizResult(existingAttempt);
       handleNavigate('result', '/result');
     } else {
       handleNavigate('quiz', '/quiz');
@@ -184,28 +216,14 @@ export default function App() {
 
   const handleAssessmentComplete = (result) => {
     setLastQuizResult(result);
-    if (currentUser) {
-      const updated = {
-        ...currentUser,
-        overallLevel: result.overallLevel,
-        competencyLevels: result.levelByCompetency,
-        competencyScores: result.scoreByCompetency,
-        assessmentHistory: [
-          ...(currentUser.assessmentHistory || []),
-          {
-            roleName: result.roleName,
-            overallScore: result.overallScorePercentage,
-            resultLevel: result.overallLevel,
-            correctAnswers: result.correctAnswers,
-            totalQuestions: result.totalQuestions,
-            questionReviews: result.questionReviews || []
-          }
-        ]
-      };
-      setCurrentUser(updated);
-      try {
-        localStorage.setItem('adaptiq_user', JSON.stringify(updated));
-      } catch {}
+    // Refresh user state
+    if (currentUser?.id) {
+      api.getUser(currentUser.id).then(updated => {
+        setCurrentUser(updated);
+        try {
+          localStorage.setItem('adaptiq_user', JSON.stringify(updated));
+        } catch {}
+      }).catch(console.warn);
     }
     handleNavigate('result', '/result');
   };
@@ -215,46 +233,42 @@ export default function App() {
   };
 
   const handleOpenModule = (moduleId) => {
+    if (!currentUser) {
+      handleNavigate('register', '/register', false, 'Please sign in or create an account to start your learning modules.');
+      return;
+    }
     setActiveModuleId(moduleId);
     handleNavigate('module', `/module/${moduleId}`);
   };
 
-  const handleModuleCompleted = (res, competency) => {
-    if (res.checkpointAvailable && competency) {
-      setCheckpointCompetency(competency);
+  const handleModuleCompleted = () => {
+    if (currentUser?.id) {
+      api.getUser(currentUser.id).then(updated => {
+        setCurrentUser(updated);
+        try {
+          localStorage.setItem('adaptiq_user', JSON.stringify(updated));
+        } catch {}
+      }).catch(console.warn);
     }
     handleNavigate('learning-path', '/learning-path');
   };
 
-  const handleCheckpointPromoted = (res) => {
-    if (currentUser) {
-      const updated = {
-        ...currentUser,
-        competencyLevels: {
-          ...currentUser.competencyLevels,
-          [res.competency]: res.newLevel
-        }
-      };
-      setCurrentUser(updated);
-      try {
-        localStorage.setItem('adaptiq_user', JSON.stringify(updated));
-      } catch {}
+  const handleCheckpointPromoted = () => {
+    if (currentUser?.id) {
+      api.getUser(currentUser.id).then(updated => {
+        setCurrentUser(updated);
+        try {
+          localStorage.setItem('adaptiq_user', JSON.stringify(updated));
+        } catch {}
+      }).catch(console.warn);
     }
+    setCheckpointCompetency(null);
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', background: '#120F17' }}>
-      {/* Full-Screen Interactive AeroShards Canvas Background */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        zIndex: 0,
-        pointerEvents: 'none',
-        overflow: 'hidden'
-      }}>
+    <div style={{ position: 'relative', minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
+      {/* Dynamic AeroShards 3D Gem Canvas Background */}
+      <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0, pointerEvents: 'none' }}>
         <AeroShards
           backgroundColor="#120F17"
           shardColor="#896ABD"
@@ -290,22 +304,31 @@ export default function App() {
 
       {/* Main UI Layer */}
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        {/* Top Navbar: Show when user is logged in OR when in authenticated view */}
-        {currentUser && (
-          <Navbar
-            activeTab={activeTab}
-            setActiveTab={handleNavigate}
-            currentUser={currentUser}
-            modelName={systemInfo.geminiModel}
-            onLogout={handleLogout}
-          />
-        )}
+        {/* Top Navbar: Always rendered in Guest or Authenticated Mode */}
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={handleNavigate}
+          currentUser={currentUser}
+          modelName={systemInfo.geminiModel}
+          onLogout={handleLogout}
+        />
 
         {/* Main Content Area */}
         <main style={{ flex: 1, paddingBottom: '60px' }}>
+          {/* Landing Page */}
+          {activeTab === 'landing' && (
+            <LandingPage
+              currentUser={currentUser}
+              onNavigate={handleNavigate}
+              onSelectRole={handleSelectRole}
+            />
+          )}
+
           {activeTab === 'login' && (
             <Login
               initialMode={loginInitialMode}
+              authNotice={authNotice}
+              preselectedRoleId={preselectedRoleId}
               onLoginSuccess={handleLoginSuccess}
               onModeChange={(mode) => {
                 setLoginInitialMode(mode);
@@ -321,6 +344,15 @@ export default function App() {
               currentUser={currentUser}
               modelName={systemInfo.geminiModel}
               onSelectRole={handleSelectRole}
+              onRequireAuth={(role) => {
+                handleNavigate(
+                  'register',
+                  '/register',
+                  false,
+                  `Create a free profile to take your adaptive diagnostic assessment for ${role.name}!`,
+                  role.id
+                );
+              }}
             />
           )}
 
@@ -410,7 +442,7 @@ export default function App() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <span>AdaptIQ Competency Platform</span>
             <span>•</span>
-            <span>AI model: {systemInfo.geminiModel || 'Configured by backend'}</span>
+            <span>AI model: {systemInfo.geminiModel || 'gemini-3.1-flash-lite'}</span>
             <span>•</span>
             <span>Spring Boot 3 + React + MongoDB Atlas</span>
           </div>

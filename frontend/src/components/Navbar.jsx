@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Compass, BookOpen, Award, User, Sparkles, ChevronDown, LogOut } from 'lucide-react';
+import { Compass, BookOpen, Award, User, Sparkles, ChevronDown, LogOut, Home, LogIn, UserPlus } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, modelName, onLogout }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -22,17 +22,18 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      background: 'rgba(18, 15, 23, 0.82)',
+      background: 'rgba(18, 15, 23, 0.88)',
       backdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(168, 85, 247, 0.18)',
+      borderBottom: '1px solid rgba(168, 85, 247, 0.2)',
       padding: '12px 24px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
+      gap: '16px'
     }}>
       {/* Brand */}
       <div 
-        onClick={() => setActiveTab('dashboard')} 
+        onClick={() => setActiveTab(currentUser ? 'dashboard' : 'landing')} 
         style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
       >
         <div style={{
@@ -53,7 +54,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
               Adapt<span className="gradient-text">IQ</span>
             </span>
             <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(168, 85, 247, 0.22)', color: '#c084fc', fontWeight: 700 }}>
-              {modelName || 'AI model'}
+              {modelName || 'gemini-3.1-flash-lite'}
             </span>
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
@@ -63,128 +64,245 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
       </div>
 
       {/* Navigation tabs */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        {/* Home / Landing link is always available */}
         <button
-          onClick={() => setActiveTab('dashboard')}
+          onClick={() => setActiveTab('landing')}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '8px 16px',
+            padding: '8px 14px',
             borderRadius: '8px',
-            background: activeTab === 'dashboard' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
-            color: activeTab === 'dashboard' ? '#d8b4fe' : 'var(--text-secondary)',
-            border: activeTab === 'dashboard' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
+            background: activeTab === 'landing' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+            color: activeTab === 'landing' ? '#d8b4fe' : 'var(--text-secondary)',
+            border: activeTab === 'landing' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
             fontWeight: 600,
             cursor: 'pointer',
             transition: 'var(--transition-smooth)'
           }}
         >
-          <Award size={18} />
-          <span>Dashboard</span>
+          <Home size={16} />
+          <span>Home</span>
         </button>
 
-        <button
-          onClick={() => setActiveTab('roles')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            background: activeTab === 'roles' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
-            color: activeTab === 'roles' ? '#d8b4fe' : 'var(--text-secondary)',
-            border: activeTab === 'roles' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)'
-          }}
-        >
-          <Compass size={18} />
-          <span>Career Tracks</span>
-        </button>
+        {currentUser ? (
+          <>
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                background: activeTab === 'dashboard' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+                color: activeTab === 'dashboard' ? '#d8b4fe' : 'var(--text-secondary)',
+                border: activeTab === 'dashboard' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'var(--transition-smooth)'
+              }}
+            >
+              <Award size={16} />
+              <span>Dashboard</span>
+            </button>
 
-        <button
-          onClick={() => setActiveTab('learning-path')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            background: activeTab === 'learning-path' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
-            color: activeTab === 'learning-path' ? '#d8b4fe' : 'var(--text-secondary)',
-            border: activeTab === 'learning-path' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)'
-          }}
-        >
-          <BookOpen size={18} />
-          <span>Learning Path</span>
-        </button>
+            <button
+              onClick={() => setActiveTab('roles')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                background: activeTab === 'roles' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+                color: activeTab === 'roles' ? '#d8b4fe' : 'var(--text-secondary)',
+                border: activeTab === 'roles' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'var(--transition-smooth)'
+              }}
+            >
+              <Compass size={16} />
+              <span>Career Tracks</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('learning-path')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                background: activeTab === 'learning-path' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+                color: activeTab === 'learning-path' ? '#d8b4fe' : 'var(--text-secondary)',
+                border: activeTab === 'learning-path' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'var(--transition-smooth)'
+              }}
+            >
+              <BookOpen size={16} />
+              <span>Learning Path</span>
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setActiveTab('roles')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              background: activeTab === 'roles' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+              color: activeTab === 'roles' ? '#d8b4fe' : 'var(--text-secondary)',
+              border: activeTab === 'roles' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'var(--transition-smooth)'
+            }}
+          >
+            <Compass size={16} />
+            <span>Career Tracks</span>
+          </button>
+        )}
       </nav>
 
-      {/* User Switcher / Profile Badge */}
-      <div style={{ position: 'relative' }}>
-        <button
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            background: 'var(--bg-card)',
-            border: '1px solid rgba(168, 85, 247, 0.25)',
-            borderRadius: 'var(--radius-full)',
-            padding: '6px 14px 6px 8px',
-            cursor: 'pointer',
-            color: 'var(--text-primary)',
-          }}
-        >
-          <div style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            background: 'rgba(168, 85, 247, 0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#d8b4fe'
-          }}>
-            <User size={16} />
-          </div>
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              {currentUser?.displayName || 'Learner'}
-            </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-              {currentUser?.roleName || 'Frontend Architect'}
-            </div>
-          </div>
-          {getLevelBadge(currentUser?.overallLevel)}
-          <ChevronDown size={14} color="var(--text-secondary)" />
-        </button>
+      {/* Right Side: Profile Dropdown (Logged in) OR Auth Buttons (Guest) */}
+      <div>
+        {currentUser ? (
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: 'var(--bg-card)',
+                border: '1px solid rgba(168, 85, 247, 0.25)',
+                borderRadius: 'var(--radius-full)',
+                padding: '6px 14px 6px 8px',
+                cursor: 'pointer',
+                transition: 'var(--transition-smooth)'
+              }}
+            >
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: 'var(--bg-glass-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <User size={16} color="#c084fc" />
+              </div>
+              <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  {currentUser.displayName}
+                </span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                  {currentUser.roleName || 'Target Role'}
+                </span>
+              </div>
+              {getLevelBadge(currentUser.overallLevel)}
+              <ChevronDown size={14} color="var(--text-muted)" />
+            </button>
 
-        {dropdownOpen && (
-          <div style={{
-            position: 'absolute',
-            right: 0,
-            top: '48px',
-            background: 'rgba(26, 21, 35, 0.95)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(168, 85, 247, 0.35)',
-            borderRadius: '12px',
-            padding: '8px',
-            minWidth: '240px',
-            boxShadow: 'var(--shadow-lg)',
-            zIndex: 60,
-          }}>
-            <div style={{ padding: '8px 12px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Account
-            </div>
-            <button type="button" onClick={() => { onLogout(); setDropdownOpen(false); }} className="btn btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', padding: '10px 12px' }}>
-              <LogOut size={16} />
-              <span>Log out</span>
+            {dropdownOpen && (
+              <div style={{
+                position: 'absolute',
+                right: 0,
+                top: 'calc(100% + 8px)',
+                width: '240px',
+                background: 'rgba(22, 18, 29, 0.98)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-lg)',
+                padding: '8px',
+                zIndex: 100
+              }}>
+                <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {currentUser.displayName}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    {currentUser.email}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    setActiveTab('dashboard');
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 12px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.85rem',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    borderRadius: 'var(--radius-sm)'
+                  }}
+                >
+                  <Award size={16} />
+                  <span>My Dashboard</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    onLogout();
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 12px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--accent-coral)',
+                    fontSize: '0.85rem',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    borderRadius: 'var(--radius-sm)'
+                  }}
+                >
+                  <LogOut size={16} />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              onClick={() => setActiveTab('login')}
+              className="btn btn-secondary"
+              style={{ padding: '7px 16px', fontSize: '0.85rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <LogIn size={15} />
+              <span>Sign In</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('register')}
+              className="btn btn-primary"
+              style={{ padding: '7px 16px', fontSize: '0.85rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <UserPlus size={15} />
+              <span>Get Started</span>
             </button>
           </div>
         )}

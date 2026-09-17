@@ -116,7 +116,7 @@ graph TD
 | **Frontend** | React 19, Vite, Lucide React, Canvas Confetti, VGPU Shaders, Vanilla CSS |
 | **Backend** | Java 17+, Spring Boot 3.2.5, Spring MVC, Spring Web |
 | **Database** | MongoDB Atlas Cloud, Spring Data MongoDB (`spring-boot-starter-data-mongodb`) |
-| **Artificial Intelligence** | Google Gemini API (`gemini-2.5-flash` / `gemini-1.5-pro`) |
+| **Artificial Intelligence** | Google Gemini API (`gemini-3.1-flash-lite`) |
 | **Build & Tooling** | Maven Wrapper (`mvnw`), Node.js / npm, PowerShell / Bash |
 
 ---

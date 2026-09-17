@@ -15,13 +15,13 @@ const DEFAULT_ROLES = [
   { id: 'role-product-engineer', name: 'Product Engineer', category: 'Product Engineering' }
 ];
 
-export default function Login({ initialMode = 'login', onLoginSuccess, onModeChange }) {
+export default function Login({ initialMode = 'login', authNotice = '', preselectedRoleId = '', onLoginSuccess, onModeChange }) {
   const [mode, setMode] = useState(initialMode === 'register' ? 'register' : 'login');
   const [roles, setRoles] = useState(DEFAULT_ROLES);
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [roleId, setRoleId] = useState('role-frontend-engineer');
+  const [roleId, setRoleId] = useState(preselectedRoleId || 'role-frontend-engineer');
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -259,6 +259,27 @@ export default function Login({ initialMode = 'login', onLoginSuccess, onModeCha
             Create Profile
           </button>
         </div>
+
+        {/* Authentication Requirement / Notification Banner */}
+        {authNotice && !serverError && (
+          <div style={{
+            padding: '12px 16px',
+            borderRadius: '10px',
+            background: 'rgba(168, 85, 247, 0.16)',
+            border: '1px solid rgba(168, 85, 247, 0.4)',
+            color: '#d8b4fe',
+            fontSize: '0.85rem',
+            marginBottom: '18px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '10px',
+            lineHeight: 1.5,
+            boxShadow: '0 0 20px rgba(168, 85, 247, 0.15)'
+          }}>
+            <Lock size={18} style={{ flexShrink: 0, marginTop: '2px', color: '#c084fc' }} />
+            <span>{authNotice}</span>
+          </div>
+        )}
 
         {/* Server Error Alert Banner */}
         {serverError && (

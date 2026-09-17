@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Compass, CheckCircle2, ArrowRight, Layers, Code, Brain, Target, ShieldCheck } from 'lucide-react';
 import { api } from '../api';
 
-export default function RoleSelection({ currentUser, modelName, onSelectRole }) {
+export default function RoleSelection({ currentUser, modelName, onSelectRole, onRequireAuth }) {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoleId, setSelectedRoleId] = useState(currentUser?.roleId || 'role-frontend-engineer');
@@ -185,18 +185,32 @@ export default function RoleSelection({ currentUser, modelName, onSelectRole }) 
               {selectedRole.name} Diagnostic Assessment
             </h2>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              {attempted
-                ? `${attempted.overallScore}% score, ${attempted.resultLevel} level. Review your attempted questions and answers.`
-                : `6 role-specific questions covering ${selectedRole.competencies?.length} competencies.`}
+              {currentUser ? (
+                attempted
+                  ? `${attempted.overallScore}% score, ${attempted.resultLevel} level. Review your attempted questions and answers.`
+                  : `6 role-specific questions covering ${selectedRole.competencies?.length} competencies.`
+              ) : (
+                `Sign in or register to take the 6-question adaptive diagnostic assessment and unlock your personalized roadmap.`
+              )}
             </p>
           </div>
 
           <button
-            onClick={() => onSelectRole(selectedRole, attempted)}
+            onClick={() => {
+              if (currentUser) {
+                onSelectRole(selectedRole, attempted);
+              } else if (onRequireAuth) {
+                onRequireAuth(selectedRole);
+              }
+            }}
             className="btn btn-primary"
             style={{ padding: '14px 28px', fontSize: '1rem' }}
           >
-            <span>{attempted ? 'Review Attempt' : 'Start Baseline Diagnostic Quiz'}</span>
+            <span>
+              {currentUser
+                ? (attempted ? 'Review Attempt' : 'Start Baseline Diagnostic Quiz')
+                : 'Sign In to Start Assessment'}
+            </span>
             <ArrowRight size={20} />
           </button>
         </div>
