@@ -61,50 +61,72 @@ Pre-configured with industry-standard competency graphs, technical benchmarks, a
 
 ```mermaid
 graph TD
-    User([Learner Browser])
-    
-    subgraph Frontend ["React 19 + Vite (Port 5173)"]
-        UI[AeroShards UI + Glassmorphic Pages]
-        AuthForm[Auth & Validation Engine]
-        Radar[Competency Radar Chart]
-        PathView[Learning Path Navigator]
-        Proxy[Vite Reverse Proxy /api]
+    User(["👤 Learner Browser"])
+
+    subgraph Frontend ["⚛️  React 18 + Vite  (Port 5173)"]
+        direction TB
+        Landing["🏠 LandingPage"]
+        Auth["🔐 Login / Register"]
+        Roles["🎯 RoleSelection"]
+        Quiz["📝 QuizView"]
+        Result["📊 AssessmentResult"]
+        Path["🗺️  LearningPath"]
+        Module["📖 ModuleViewer"]
+        Dash["📈 Dashboard"]
+        Checkpoint["🏆 CheckpointModal"]
+        AeroShards["💎 AeroShards WebGL Background"]
     end
 
-    subgraph Backend ["Spring Boot 3 (Port 8080)"]
-        AuthCtrl[Auth Controller]
-        RoleCtrl[Role & Competency Controller]
-        AssessCtrl[Assessment Controller]
-        PathCtrl[Learning Path Controller]
-        DashCtrl[Dashboard Controller]
-        
-        AI_GW[Gemini AI Gateway Service]
-        Engine[Adaptive Evaluation Engine]
-        DataStore[DataStore Coordinator]
+    subgraph Backend ["☕ Spring Boot 3.2.5  (Port 8080)"]
+        direction TB
+        AuthCtrl["AuthController"]
+        RoleCtrl["RoleController"]
+        AssessCtrl["AssessmentController"]
+        PathCtrl["LearningPathController"]
+        ModCtrl["ModuleController"]
+        DashCtrl["DashboardController"]
+        CheckCtrl["CheckpointController"]
+
+        AI_GW["🤖 AIGatewayService\ngemini-3.1-flash-lite"]
+        AssessSvc["AssessmentService"]
+        CurriculumSvc["CurriculumService"]
+        ContentSvc["ContentSynthesisService"]
+        EvalSvc["EvaluationService"]
+        DataStore["🗄️  DataStore Coordinator\n(Write-through Cache)"]
     end
 
-    subgraph Cloud ["External Cloud Services"]
-        Gemini[Google Gemini 2.5 API]
-        Atlas[(MongoDB Atlas Cloud Cluster)]
+    subgraph Cloud ["☁️  External Cloud Services"]
+        Gemini["🔮 Google Gemini API\ngemini-3.1-flash-lite"]
+        Atlas[("🍃 MongoDB Atlas\nadaptiq database")]
     end
 
-    User --> UI
-    UI --> AuthForm
-    UI --> Radar
-    UI --> PathView
-    UI --> Proxy
-    Proxy -->|REST Requests| Backend
-    
+    User --> Landing
+    Landing --> Auth
+    Auth --> Roles
+    Roles --> Quiz
+    Quiz --> Result
+    Result --> Path
+    Path --> Module
+    Module --> Checkpoint
+    Dash -.-> DataStore
+
+    Frontend -->|"REST /api"| Backend
+
     AuthCtrl --> DataStore
     RoleCtrl --> DataStore
-    PathCtrl --> DataStore
+    AssessCtrl --> AssessSvc
+    PathCtrl --> CurriculumSvc
+    ModCtrl --> ContentSvc
     DashCtrl --> DataStore
-    AssessCtrl --> Engine
-    
-    Engine --> AI_GW
-    AI_GW -->|Prompt Engineering| Gemini
-    
-    DataStore -->|Spring Data Repositories| Atlas
+    CheckCtrl --> AssessSvc
+
+    AssessSvc --> EvalSvc
+    AssessSvc --> AI_GW
+    CurriculumSvc --> AI_GW
+    ContentSvc --> AI_GW
+
+    AI_GW -->|"Prompt Engineering"| Gemini
+    DataStore -->|"Spring Data MongoDB"| Atlas
 ```
 
 ---
@@ -113,11 +135,11 @@ graph TD
 
 | Layer | Technologies |
 |---|---|
-| **Frontend** | React 19, Vite, Lucide React, Canvas Confetti, VGPU Shaders, Vanilla CSS |
-| **Backend** | Java 17+, Spring Boot 3.2.5, Spring MVC, Spring Web |
-| **Database** | MongoDB Atlas Cloud, Spring Data MongoDB (`spring-boot-starter-data-mongodb`) |
-| **Artificial Intelligence** | Google Gemini API (`gemini-3.1-flash-lite`) |
-| **Build & Tooling** | Maven Wrapper (`mvnw`), Node.js / npm, PowerShell / Bash |
+| **Frontend** | React 18, Vite 8, Lucide React, Vanilla CSS, AeroShards (WebGL) |
+| **Backend** | Java 17, Spring Boot 3.2.5, Spring MVC, Spring Web |
+| **Database** | MongoDB Atlas (Cloud), Spring Data MongoDB |
+| **AI Engine** | Google Gemini API — `gemini-3.1-flash-lite` |
+| **Build & Tooling** | Maven Wrapper (`mvnw`), Node.js / npm, Vite Proxy |
 
 ---
 
