@@ -62,6 +62,9 @@ export const api = {
   getUserProfile: (userId) =>
     request(`/users/profile?userId=${encodeURIComponent(userId)}`),
 
+  getUser: (userId) =>
+    request(`/users/${encodeURIComponent(userId)}`),
+
   getAllUsers: () => request('/users/all'),
   getSystemInfo: () => request('/system/info'),
 

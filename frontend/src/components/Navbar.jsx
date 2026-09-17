@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Compass, BookOpen, Award, User, Sparkles, ChevronDown, LogOut, Home, LogIn, UserPlus } from 'lucide-react';
+import { Compass, BookOpen, Award, User, Sparkles, ChevronDown, LogOut, LogIn, UserPlus } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, modelName, onLogout }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -65,27 +65,6 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
 
       {/* Navigation tabs */}
       <nav style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        {/* Home / Landing link is always available */}
-        <button
-          onClick={() => setActiveTab('landing')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            background: activeTab === 'landing' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
-            color: activeTab === 'landing' ? '#d8b4fe' : 'var(--text-secondary)',
-            border: activeTab === 'landing' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)'
-          }}
-        >
-          <Home size={16} />
-          <span>Home</span>
-        </button>
-
         {currentUser ? (
           <>
             <button

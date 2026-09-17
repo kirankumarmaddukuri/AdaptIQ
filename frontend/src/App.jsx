@@ -21,6 +21,8 @@ const parseRoute = (rawPath, hasUser = false) => {
   const clean = rawPath.replace(/\/+$/, '') || '/';
   
   if (clean === '/' || clean === '') {
+    // Logged-in users go straight to their dashboard
+    if (hasUser) return { tab: 'dashboard', path: '/dashboard' };
     return { tab: 'landing', path: '/' };
   }
   if (clean === '/login') {
@@ -265,42 +267,57 @@ export default function App() {
     setCheckpointCompetency(null);
   };
 
+
+  // Pause the heavy WebGL animation on content-heavy pages to improve performance
+  const TABS_NO_ANIMATION = ['quiz', 'result', 'module', 'learning-path', 'dashboard'];
+  const pauseAnimation = TABS_NO_ANIMATION.includes(activeTab);
+
   return (
     <div style={{ position: 'relative', minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
-      {/* Dynamic AeroShards 3D Gem Canvas Background */}
-      <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0, pointerEvents: 'none' }}>
-        <AeroShards
-          backgroundColor="#120F17"
-          shardColor="#896ABD"
-          accentColor="#A855F7"
-          placement="full"
-          flow="stream"
-          material="pearl"
-          detail="balanced"
-          effect="none"
-          scale={1}
-          spread={1}
-          depth={1}
-          speed={1}
-          spin={1}
-          interaction="repel"
-          density={1.5}
-          shardSize={1.1}
-          stretch={1}
-          turbulence={1}
-          glow={1}
-          edgeSoftness={2}
-          bloom={0.5}
-          grain={0.05}
-          chromaticAberration={0.0075}
-          transitionDuration={1}
-          interactionRadius={1.5}
-          interactionStrength={0.5}
-          rippleIntensity={1}
-          holdToGather
-          paused={false}
-        />
-      </div>
+      {/* Dynamic AeroShards 3D Gem Canvas Background — hidden on content-heavy pages */}
+      {!pauseAnimation && (
+        <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0, pointerEvents: 'none' }}>
+          <AeroShards
+            backgroundColor="#120F17"
+            shardColor="#896ABD"
+            accentColor="#A855F7"
+            placement="full"
+            flow="stream"
+            material="pearl"
+            detail="balanced"
+            effect="none"
+            scale={1}
+            spread={1}
+            depth={1}
+            speed={1}
+            spin={1}
+            interaction="repel"
+            density={1.5}
+            shardSize={1.1}
+            stretch={1}
+            turbulence={1}
+            glow={1}
+            edgeSoftness={2}
+            bloom={0.5}
+            grain={0.05}
+            chromaticAberration={0.0075}
+            transitionDuration={1}
+            interactionRadius={1.5}
+            interactionStrength={0.5}
+            rippleIntensity={1}
+            holdToGather
+            paused={false}
+          />
+        </div>
+      )}
+      {/* Dark fallback bg for content-heavy pages */}
+      {pauseAnimation && (
+        <div style={{
+          position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0,
+          background: 'linear-gradient(135deg, #0d0b13 0%, #120F17 50%, #0a0810 100%)'
+        }} />
+      )}
+
 
       {/* Main UI Layer */}
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

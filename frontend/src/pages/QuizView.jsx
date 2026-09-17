@@ -5,6 +5,7 @@ import { api } from '../api';
 export default function QuizView({ currentUser, activeRole, modelName, onAssessmentComplete }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [quiz, setQuiz] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { questionId: selectedIndex }
@@ -56,6 +57,7 @@ export default function QuizView({ currentUser, activeRole, modelName, onAssessm
   };
 
   const handleSubmit = async () => {
+    setSubmitError('');
     try {
       setSubmitting(true);
       const result = await api.submitAssessment({
@@ -63,10 +65,11 @@ export default function QuizView({ currentUser, activeRole, modelName, onAssessm
         userId: currentUser?.id || 'user-demo-1',
         answers: answers
       });
+      // Always navigate forward with the result
       onAssessmentComplete(result);
     } catch (err) {
       console.error('Failed to submit assessment:', err);
-    } finally {
+      setSubmitError(err?.message || 'Submission failed. Please try again.');
       setSubmitting(false);
     }
   };
@@ -264,38 +267,84 @@ export default function QuizView({ currentUser, activeRole, modelName, onAssessm
           </div>
 
           {/* Navigation Controls */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '20px', borderTop: '1px solid var(--border-subtle)' }}>
-            <button
-              className="btn btn-secondary"
-              disabled={currentIndex === 0}
-              onClick={() => setCurrentIndex(prev => prev - 1)}
-            >
-              <ChevronLeft size={18} />
-              Previous
-            </button>
-
-            {currentIndex < questions.length - 1 ? (
-              <button
-                className="btn btn-primary"
-                onClick={() => setCurrentIndex(prev => prev + 1)}
-              >
-                Next
-                <ChevronRight size={18} />
-              </button>
-            ) : (
-              <button
-                className="btn btn-emerald"
-                disabled={answeredCount < questions.length || submitting}
-                onClick={handleSubmit}
-                style={{ padding: '12px 28px' }}
-              >
-                {submitting ? 'Submitting...' : 'Submit & Analyze'}
-                <CheckCircle2 size={18} />
-              </button>
+          <div style={{ paddingTop: '20px', borderTop: '1px solid var(--border-subtle)' }}>
+            {/* Submit error banner */}
+            {submitError && (
+              <div style={{
+                padding: '10px 14px',
+                marginBottom: '14px',
+                borderRadius: '8px',
+                background: 'rgba(244, 63, 94, 0.12)',
+                border: '1px solid rgba(244, 63, 94, 0.35)',
+                color: '#fb7185',
+                fontSize: '0.85rem',
+                display: 'flex',
+                gap: '8px',
+                alignItems: 'flex-start'
+              }}>
+                <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
+                <span>{submitError} — Check the backend is running, then retry.</span>
+              </div>
             )}
+
+            {/* Unanswered questions warning */}
+            {currentIndex === questions.length - 1 && answeredCount < questions.length && (
+              <div style={{
+                padding: '8px 12px',
+                marginBottom: '12px',
+                borderRadius: '8px',
+                background: 'rgba(245, 158, 11, 0.1)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                color: '#fcd34d',
+                fontSize: '0.8rem'
+              }}>
+                ⚠️ {questions.length - answeredCount} question{questions.length - answeredCount > 1 ? 's' : ''} still unanswered. You can still submit.
+              </div>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <button
+                className="btn btn-secondary"
+                disabled={currentIndex === 0}
+                onClick={() => setCurrentIndex(prev => prev - 1)}
+              >
+                <ChevronLeft size={18} />
+                Previous
+              </button>
+
+              {currentIndex < questions.length - 1 ? (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setCurrentIndex(prev => prev + 1)}
+                >
+                  Next
+                  <ChevronRight size={18} />
+                </button>
+              ) : (
+                <button
+                  className="btn btn-emerald"
+                  disabled={submitting}
+                  onClick={handleSubmit}
+                  style={{ padding: '12px 28px', minWidth: '190px' }}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin-slow" />
+                      Analyzing Results...
+                    </>
+                  ) : (
+                    <>
+                      Submit &amp; Analyze
+                      <CheckCircle2 size={18} />
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
     </div>
   );
+
 }
