@@ -315,9 +315,8 @@ npm run build
 
 ---
 
-## 👥 Authors & Acknowledgments
+## 🙏 Acknowledgments
 
-- **Lead Developer**: Kiran Kumar Maddukuri ([@kirankumarmaddukuri](https://github.com/kirankumarmaddukuri))
 - **UI Aesthetics**: Inspired by [ReactBits AeroShards](https://reactbits.dev/backgrounds/aero-shards)
 - **AI Infrastructure**: Powered by [Google Gemini](https://ai.google.dev/)
 - **Database**: Cloud persistence managed by [MongoDB Atlas](https://www.mongodb.com/atlas)
