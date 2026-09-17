@@ -49,7 +49,7 @@ export default function CheckpointModal({ userId, competency, modelName, onClose
           particleCount: 120,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#6366f1', '#10b981', '#f59e0b', '#ec4899']
+          colors: ['#a855f7', '#896abd', '#c084fc', '#34d399']
         });
         if (onPromoted) onPromoted(res);
       }
@@ -77,7 +77,7 @@ export default function CheckpointModal({ userId, competency, modelName, onClose
         width: '100%',
         maxHeight: '90vh',
         overflowY: 'auto',
-        background: '#0e1626',
+        background: 'rgba(22, 17, 30, 0.96)',
         border: '1px solid var(--border-glow)',
         borderRadius: 'var(--radius-lg)',
         padding: '28px',
@@ -128,7 +128,7 @@ export default function CheckpointModal({ userId, competency, modelName, onClose
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <Loader2 size={36} className="animate-spin-slow" color="#818cf8" style={{ margin: '0 auto 16px' }} />
+            <Loader2 size={36} className="animate-spin-slow" color="#a855f7" style={{ margin: '0 auto 16px' }} />
             <div style={{ fontSize: '1rem', fontWeight: 600 }}>{modelName || 'AI model'} synthesizing checkpoint quiz...</div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
               Validating practical comprehension criteria
@@ -238,7 +238,7 @@ export default function CheckpointModal({ userId, competency, modelName, onClose
                           style={{
                             padding: '10px 14px',
                             borderRadius: '8px',
-                            background: isSelected ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                            background: isSelected ? 'rgba(168, 85, 247, 0.22)' : 'rgba(255, 255, 255, 0.04)',
                             border: `1px solid ${isSelected ? 'var(--accent-primary)' : 'transparent'}`,
                             cursor: 'pointer',
                             fontSize: '0.88rem',

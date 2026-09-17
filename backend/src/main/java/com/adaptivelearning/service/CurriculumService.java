@@ -84,6 +84,7 @@ public class CurriculumService {
     private List<LearningModule> generateModulesWithAI(Role role, User user) {
         String levelsStr = user.getCompetencyLevels().toString();
         String scoresStr = user.getCompetencyScores().toString();
+        String targetLevel = resolveModuleLevel(user.getOverallLevel(), null);
 
         String prompt = String.format("""
             You are a Lead Curriculum Architect at a top tech company.
@@ -93,8 +94,13 @@ public class CurriculumService {
             Competency Scores: %s
             Competency Levels: %s
             
+            MANDATORY LEVEL REQUIREMENT:
+            The learner's current assessed level is "%s".
+            EVERY single module in this roadmap MUST strictly have "level": "%s".
+            Do NOT create modules of any other level. If the learner is NOVICE, all modules MUST be NOVICE.
+            
             Guidelines:
-            1. Prioritize more modules on competencies where score is lowest or level is NOVICE.
+            1. Prioritize more modules on competencies where score is lowest or reinforcement is needed.
             2. Each module must be a concise micro-learning unit (10-25 minutes).
             3. Return strict JSON array matching this schema:
             [
@@ -103,7 +109,7 @@ public class CurriculumService {
                 "title": "Module Title",
                 "description": "Short 2-sentence summary of practical takeaways",
                 "competency": "Exact Competency Name",
-                "level": "NOVICE" or "INTERMEDIATE" or "EXPERT",
+                "level": "%s",
                 "estimatedMinutes": 15,
                 "learningObjectives": [
                   "Objective 1",
@@ -113,7 +119,7 @@ public class CurriculumService {
               }
             ]
             Return only valid JSON array.
-            """, role.getName(), user.getOverallLevel(), scoresStr, levelsStr);
+            """, role.getName(), targetLevel, scoresStr, levelsStr, targetLevel, targetLevel, targetLevel);
 
         String response = aiGatewayService.generateContent("You strictly output valid JSON arrays representing curriculum roadmaps.", prompt);
         String json = aiGatewayService.extractJson(response);
@@ -125,8 +131,7 @@ public class CurriculumService {
                     for (int i = 0; i < list.size(); i++) {
                         LearningModule m = list.get(i);
                         m.setId("mod-" + UUID.randomUUID().toString().substring(0, 8));
-                        String competencyLevel = user.getCompetencyLevels().get(m.getCompetency());
-                        m.setLevel(resolveModuleLevel(user.getOverallLevel(), competencyLevel));
+                        m.setLevel(targetLevel);
                     }
                     return list;
                 }
@@ -141,14 +146,14 @@ public class CurriculumService {
         List<LearningModule> modules = new ArrayList<>();
         List<String> comps = role.getCompetencies();
 
+        String targetLevel = resolveModuleLevel(user.getOverallLevel(), null);
+
         int id = 1;
         for (String comp : comps) {
-            String userLevel = resolveModuleLevel(user.getOverallLevel(), user.getCompetencyLevels().get(comp));
-
             LearningModule m = new LearningModule();
             m.setId("mod-" + UUID.randomUUID().toString().substring(0, 8));
             m.setCompetency(comp);
-            m.setLevel(userLevel);
+            m.setLevel(targetLevel);
             m.setEstimatedMinutes(15);
 
             if (comp.contains("HTML") || comp.contains("CSS")) {
@@ -210,11 +215,10 @@ public class CurriculumService {
 
     private String resolveModuleLevel(String overallLevel, String competencyLevel) {
         String overall = normalizeLevel(overallLevel);
-        String competency = normalizeLevel(competencyLevel);
         if ("UNASSESSED".equals(overall)) {
             return "NOVICE";
         }
-        return levelRank(competency) < levelRank(overall) ? overall : competency;
+        return overall;
     }
 
     private String normalizeLevel(String level) {
@@ -231,8 +235,25 @@ public class CurriculumService {
     public LearningPath getPathForUser(String userId) {
         LearningPath path = dataStore.getLearningPathByUserId(userId);
         if (path == null) {
-            // Generate initial path if none exists
             path = generatePersonalizedPath(userId);
+        } else {
+            // Align all uncompleted modules with the learner's assessed level
+            User user = dataStore.getUser(userId);
+            String targetLevel = (user != null && user.getOverallLevel() != null && !"UNASSESSED".equalsIgnoreCase(user.getOverallLevel()))
+                    ? user.getOverallLevel()
+                    : "NOVICE";
+            boolean modified = false;
+            for (LearningModule m : path.getModules()) {
+                if (!targetLevel.equalsIgnoreCase(m.getLevel()) && !"COMPLETED".equalsIgnoreCase(m.getStatus())) {
+                    m.setLevel(targetLevel);
+                    m.setContent(null); // Clear cached content so it re-synthesizes for targetLevel
+                    dataStore.saveModule(m);
+                    modified = true;
+                }
+            }
+            if (modified) {
+                dataStore.saveLearningPath(path);
+            }
         }
         return path;
     }

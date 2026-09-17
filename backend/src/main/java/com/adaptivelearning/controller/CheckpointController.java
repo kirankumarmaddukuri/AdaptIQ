@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/checkpoint")
+@RequestMapping({"/api/checkpoint", "/api/checkpoints"})
 public class CheckpointController {
 
     private final CheckpointService checkpointService;

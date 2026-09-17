@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, CheckCircle, Lock, Play, Clock, Sparkles, AlertCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle, Lock, Play, Clock, Sparkles, ArrowRight, HelpCircle } from 'lucide-react';
 import { api } from '../api';
 
 export default function LearningPath({ currentUser, onOpenModule }) {
@@ -32,7 +32,7 @@ export default function LearningPath({ currentUser, onOpenModule }) {
       case 'AVAILABLE':
       case 'IN_PROGRESS':
         return (
-          <span className="badge" style={{ background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.4)' }}>
+          <span className="badge" style={{ background: 'rgba(168, 85, 247, 0.22)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.45)' }}>
             <Play size={12} /> Ready to Learn
           </span>
         );
@@ -48,7 +48,7 @@ export default function LearningPath({ currentUser, onOpenModule }) {
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-secondary)' }}>
-        <Sparkles size={36} className="animate-spin-slow" color="#818cf8" style={{ margin: '0 auto 16px' }} />
+        <Sparkles size={36} className="animate-spin-slow" color="#a855f7" style={{ margin: '0 auto 16px' }} />
         <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff' }}>Loading Adaptive Curriculum...</div>
         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
           Organizing micro-learning modules based on your baseline competency categorization.
@@ -71,7 +71,7 @@ export default function LearningPath({ currentUser, onOpenModule }) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
           <div>
-            <span className="badge" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', marginBottom: '8px' }}>
+            <span className="badge" style={{ background: 'rgba(168, 85, 247, 0.18)', color: '#c4b5fd', marginBottom: '8px' }}>
               Adaptive Roadmap
             </span>
             <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fff' }}>
@@ -124,9 +124,9 @@ export default function LearningPath({ currentUser, onOpenModule }) {
                   ? '1px solid rgba(16, 185, 129, 0.35)'
                   : '1px solid var(--border-subtle)',
                 background: isAvailable
-                  ? 'rgba(20, 28, 52, 0.85)'
+                  ? 'rgba(38, 28, 54, 0.85)'
                   : isLocked
-                  ? 'rgba(12, 17, 29, 0.5)'
+                  ? 'rgba(18, 15, 23, 0.55)'
                   : 'var(--bg-card)',
                 boxShadow: isAvailable ? 'var(--shadow-glow)' : 'var(--shadow-sm)',
                 display: 'flex',
@@ -161,12 +161,23 @@ export default function LearningPath({ currentUser, onOpenModule }) {
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
                     <span className="badge badge-comp">{module.competency}</span>
                     <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)' }}>
                       {module.level}
                     </span>
                     {getStatusBadge(module.status)}
+                    <span className="badge" style={{
+                      background: isCompleted ? 'rgba(16, 185, 129, 0.15)' : 'rgba(6, 182, 212, 0.15)',
+                      color: isCompleted ? '#34d399' : '#22d3ee',
+                      border: `1px solid ${isCompleted ? 'rgba(16, 185, 129, 0.35)' : 'rgba(6, 182, 212, 0.35)'}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <HelpCircle size={12} />
+                      <span>{isCompleted ? 'Quiz Passed' : 'Quiz Checkpoint'}</span>
+                    </span>
                   </div>
 
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', marginBottom: '6px' }}>

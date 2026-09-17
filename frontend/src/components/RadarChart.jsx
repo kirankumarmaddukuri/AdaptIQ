@@ -44,9 +44,9 @@ export default function RadarChart({ scores = {}, size = 320 }) {
       <svg width={size} height={size} style={{ overflow: 'visible' }}>
         <defs>
           <radialGradient id="radarFill" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
-            <stop offset="80%" stopColor="#8b5cf6" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#d946ef" stopOpacity="0.05" />
+            <stop offset="0%" stopColor="#a855f7" stopOpacity="0.45" />
+            <stop offset="70%" stopColor="#896abd" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#c084fc" stopOpacity="0.08" />
           </radialGradient>
           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="3" result="blur" />
@@ -124,7 +124,7 @@ export default function RadarChart({ scores = {}, size = 320 }) {
         <polygon
           points={polygonPoints}
           fill="url(#radarFill)"
-          stroke="#818cf8"
+          stroke="#a855f7"
           strokeWidth="2.5"
           filter="url(#glow)"
         />
@@ -139,15 +139,15 @@ export default function RadarChart({ scores = {}, size = 320 }) {
                 cy={y}
                 r="5"
                 fill="#ffffff"
-                stroke="#6366f1"
+                stroke="#896abd"
                 strokeWidth="2"
-                style={{ filter: 'drop-shadow(0 0 6px #6366f1)' }}
+                style={{ filter: 'drop-shadow(0 0 8px #a855f7)' }}
               />
               <text
                 x={x}
                 y={y - 8}
                 textAnchor="middle"
-                fill="#38bdf8"
+                fill="#d8b4fe"
                 fontSize="10"
                 fontWeight="700"
               >

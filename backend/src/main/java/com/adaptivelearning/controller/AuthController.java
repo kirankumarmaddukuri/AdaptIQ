@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(originPatterns = "*", allowedHeaders = "*", allowCredentials = "true")
 public class AuthController {
 
     private final DataStore dataStore;
@@ -43,14 +44,16 @@ public class AuthController {
         if (email == null || displayName == null || password == null || roleId == null || password.length() < 6) {
             return ResponseEntity.badRequest().body(Map.of("message", "Name, email, role, and a password of at least 6 characters are required."));
         }
-        if (dataStore.getUserByEmail(email) != null) {
-            return ResponseEntity.status(409).body(Map.of("message", "An account already exists for this email."));
-        }
         if (dataStore.getRole(roleId) == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Please select a valid role."));
         }
 
-        User user = new User("user-" + UUID.randomUUID().toString().substring(0, 8), email, displayName);
+        User user = dataStore.getUserByEmail(email);
+        if (user == null) {
+            user = new User("user-" + UUID.randomUUID().toString().substring(0, 8), email, displayName);
+        } else {
+            user.setDisplayName(displayName);
+        }
         user.setRoleId(roleId);
         user.setRoleName(dataStore.getRole(roleId).getName());
         dataStore.saveUser(user);

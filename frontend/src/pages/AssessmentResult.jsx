@@ -10,7 +10,7 @@ export default function AssessmentResult({ result, currentUser, modelName, onPat
   const getLevelColor = (level) => {
     switch (level?.toUpperCase()) {
       case 'EXPERT': return '#34d399';
-      case 'INTERMEDIATE': return '#818cf8';
+      case 'INTERMEDIATE': return '#a855f7';
       default: return '#fbbf24';
     }
   };
@@ -33,7 +33,7 @@ export default function AssessmentResult({ result, currentUser, modelName, onPat
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
       {/* Top Banner */}
       <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-        <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', marginBottom: '12px' }}>
+        <span className="badge" style={{ background: 'rgba(168, 85, 247, 0.18)', color: '#c4b5fd', marginBottom: '12px' }}>
           Diagnostic Assessment Complete
         </span>
         <h1 style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '10px' }}>
@@ -116,10 +116,10 @@ export default function AssessmentResult({ result, currentUser, modelName, onPat
         borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border-glow)',
         marginBottom: '36px',
-        background: 'rgba(20, 26, 45, 0.8)'
+        background: 'rgba(26, 21, 35, 0.85)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-          <Brain size={24} color="#818cf8" />
+          <Brain size={24} color="#a855f7" />
           <h3 style={{ fontSize: '1.15rem', color: '#fff' }}>{modelName || 'AI'} Adaptive Evaluation & Growth Feedback</h3>
         </div>
         <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
@@ -145,7 +145,7 @@ export default function AssessmentResult({ result, currentUser, modelName, onPat
           alignItems: 'center',
           justifyContent: 'center',
           margin: '0 auto 16px',
-          boxShadow: '0 0 25px rgba(99, 102, 241, 0.5)'
+          boxShadow: '0 0 25px rgba(168, 85, 247, 0.5)'
         }}>
           <BookOpen size={28} color="#fff" />
         </div>

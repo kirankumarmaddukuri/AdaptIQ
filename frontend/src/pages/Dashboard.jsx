@@ -25,7 +25,7 @@ export default function Dashboard({ currentUser, onNavigate, onTriggerCheckpoint
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-secondary)' }}>
-        <Sparkles size={36} className="animate-spin-slow" color="#818cf8" style={{ margin: '0 auto 16px' }} />
+        <Sparkles size={36} className="animate-spin-slow" color="#a855f7" style={{ margin: '0 auto 16px' }} />
         <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff' }}>Loading Employee Dashboard...</div>
       </div>
     );
@@ -34,7 +34,7 @@ export default function Dashboard({ currentUser, onNavigate, onTriggerCheckpoint
   const getLevelColor = (level) => {
     switch (level?.toUpperCase()) {
       case 'EXPERT': return '#34d399';
-      case 'INTERMEDIATE': return '#818cf8';
+      case 'INTERMEDIATE': return '#a855f7';
       default: return '#fbbf24';
     }
   };
@@ -48,7 +48,7 @@ export default function Dashboard({ currentUser, onNavigate, onTriggerCheckpoint
         padding: '36px',
         borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border-glow)',
-        background: 'linear-gradient(135deg, rgba(25, 35, 60, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%)',
+        background: 'linear-gradient(135deg, rgba(38, 28, 56, 0.85) 0%, rgba(18, 15, 23, 0.95) 100%)',
         marginBottom: '32px',
         display: 'flex',
         alignItems: 'center',
@@ -106,7 +106,7 @@ export default function Dashboard({ currentUser, onNavigate, onTriggerCheckpoint
         <div className="glass-panel" style={{ padding: '20px 24px', borderRadius: 'var(--radius-md)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Curriculum Progress</span>
-            <Target size={20} color="#818cf8" />
+            <Target size={20} color="#c084fc" />
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fff' }}>
             {stats?.overallProgressPercentage || 0}%
@@ -122,7 +122,7 @@ export default function Dashboard({ currentUser, onNavigate, onTriggerCheckpoint
             <Flame size={20} color="#f59e0b" />
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f59e0b' }}>
-            {stats?.learningStreakDays || 0} Days
+            {stats?.learningStreakDays || 0} {stats?.learningStreakDays === 1 ? 'Day' : 'Days'}
           </div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
             Active daily engagement
@@ -287,7 +287,7 @@ export default function Dashboard({ currentUser, onNavigate, onTriggerCheckpoint
                   </p>
                 </div>
 
-                <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '6px', color: '#818cf8', fontSize: '0.85rem', fontWeight: 600 }}>
+                <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '6px', color: '#a855f7', fontSize: '0.85rem', fontWeight: 600 }}>
                   <Play size={14} />
                   <span>Start Module</span>
                 </div>

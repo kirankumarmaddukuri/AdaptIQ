@@ -22,9 +22,9 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      background: 'rgba(8, 12, 20, 0.85)',
+      background: 'rgba(18, 15, 23, 0.82)',
       backdropFilter: 'blur(20px)',
-      borderBottom: '1px solid var(--border-subtle)',
+      borderBottom: '1px solid rgba(168, 85, 247, 0.18)',
       padding: '12px 24px',
       display: 'flex',
       alignItems: 'center',
@@ -43,7 +43,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 0 15px rgba(99, 102, 241, 0.4)'
+          boxShadow: '0 0 18px rgba(168, 85, 247, 0.45)'
         }}>
           <Sparkles size={22} color="#ffffff" />
         </div>
@@ -52,7 +52,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
             <span style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.03em', color: '#fff' }}>
               Adapt<span className="gradient-text">IQ</span>
             </span>
-            <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', fontWeight: 700 }}>
+            <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(168, 85, 247, 0.22)', color: '#c084fc', fontWeight: 700 }}>
               {modelName || 'AI model'}
             </span>
           </div>
@@ -72,9 +72,9 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
             gap: '8px',
             padding: '8px 16px',
             borderRadius: '8px',
-            background: activeTab === 'dashboard' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-            color: activeTab === 'dashboard' ? '#a5b4fc' : 'var(--text-secondary)',
-            border: activeTab === 'dashboard' ? '1px solid rgba(99, 102, 241, 0.35)' : '1px solid transparent',
+            background: activeTab === 'dashboard' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+            color: activeTab === 'dashboard' ? '#d8b4fe' : 'var(--text-secondary)',
+            border: activeTab === 'dashboard' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
             fontWeight: 600,
             cursor: 'pointer',
             transition: 'var(--transition-smooth)'
@@ -92,9 +92,9 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
             gap: '8px',
             padding: '8px 16px',
             borderRadius: '8px',
-            background: activeTab === 'roles' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-            color: activeTab === 'roles' ? '#a5b4fc' : 'var(--text-secondary)',
-            border: activeTab === 'roles' ? '1px solid rgba(99, 102, 241, 0.35)' : '1px solid transparent',
+            background: activeTab === 'roles' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+            color: activeTab === 'roles' ? '#d8b4fe' : 'var(--text-secondary)',
+            border: activeTab === 'roles' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
             fontWeight: 600,
             cursor: 'pointer',
             transition: 'var(--transition-smooth)'
@@ -112,9 +112,9 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
             gap: '8px',
             padding: '8px 16px',
             borderRadius: '8px',
-            background: activeTab === 'learning-path' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-            color: activeTab === 'learning-path' ? '#a5b4fc' : 'var(--text-secondary)',
-            border: activeTab === 'learning-path' ? '1px solid rgba(99, 102, 241, 0.35)' : '1px solid transparent',
+            background: activeTab === 'learning-path' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+            color: activeTab === 'learning-path' ? '#d8b4fe' : 'var(--text-secondary)',
+            border: activeTab === 'learning-path' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
             fontWeight: 600,
             cursor: 'pointer',
             transition: 'var(--transition-smooth)'
@@ -134,7 +134,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
             alignItems: 'center',
             gap: '10px',
             background: 'var(--bg-card)',
-            border: '1px solid var(--border-subtle)',
+            border: '1px solid rgba(168, 85, 247, 0.25)',
             borderRadius: 'var(--radius-full)',
             padding: '6px 14px 6px 8px',
             cursor: 'pointer',
@@ -145,11 +145,11 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
             width: '28px',
             height: '28px',
             borderRadius: '50%',
-            background: 'rgba(99,102,241,0.25)',
+            background: 'rgba(168, 85, 247, 0.25)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#c7d2fe'
+            color: '#d8b4fe'
           }}>
             <User size={16} />
           </div>
@@ -170,9 +170,9 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, modelName
             position: 'absolute',
             right: 0,
             top: '48px',
-            background: 'rgba(15, 23, 42, 0.95)',
+            background: 'rgba(26, 21, 35, 0.95)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid var(--border-glow)',
+            border: '1px solid rgba(168, 85, 247, 0.35)',
             borderRadius: '12px',
             padding: '8px',
             minWidth: '240px',

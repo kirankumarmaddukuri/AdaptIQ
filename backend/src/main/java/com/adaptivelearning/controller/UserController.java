@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping({"/api/users", "/api/user"})
 public class UserController {
 
     private final DataStore dataStore;
@@ -19,11 +19,30 @@ public class UserController {
         this.dataStore = dataStore;
     }
 
+    @GetMapping
+    public ResponseEntity<List<User>> getUsers() {
+        return ResponseEntity.ok(new ArrayList<>(dataStore.getUsers().values()));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(new ArrayList<>(dataStore.getUsers().values()));
+    }
+
     @GetMapping("/profile")
     public ResponseEntity<User> getProfile(@RequestParam(defaultValue = "user-demo-1") String userId) {
         User user = dataStore.getUser(userId);
         if (user == null) {
             user = dataStore.getUsers().values().iterator().next();
+        }
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUserById(@PathVariable String userId) {
+        User user = dataStore.getUser(userId);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(user);
     }
@@ -43,9 +62,5 @@ public class UserController {
         dataStore.saveUser(user);
         return ResponseEntity.ok(user);
     }
-
-    @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(new ArrayList<>(dataStore.getUsers().values()));
-    }
 }
+

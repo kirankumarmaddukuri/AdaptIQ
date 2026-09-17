@@ -58,20 +58,60 @@ public class ContentSynthesisService {
 
         String levelInstructions;
         String contentLength;
+        String sectionRequirements;
+
         if ("NOVICE".equalsIgnoreCase(level)) {
-            levelInstructions = "Target audience: NOVICE. Use crystal-clear analogies, simplified summaries, step-by-step beginner explanations, clear definitions, and visual ASCII diagrams. Avoid overwhelming jargon.";
-            contentLength = "Write 300-400 words so the learner gets enough context and guided explanation.";
+            levelInstructions = """
+                TARGET AUDIENCE: NOVICE (Foundational learner / Beginner)
+                TONE: Warm, patient, accessible, clear, and pedagogical.
+                MANDATORY REQUIREMENTS:
+                1. NEAT DEFINITIONS: Explicitly define every core technical term, acronym, and keyword with neat, simple definitions before using it. Explain "what it is" and "why it matters" in plain language.
+                2. INTUITIVE REAL-WORLD ANALOGY: Provide an intuitive, memorable real-world analogy (e.g. comparing the concept to postal mail, kitchen recipes, blueprints, or telephone switchboards) to anchor comprehension.
+                3. STEP-BY-STEP GUIDANCE: Break explanations into clear, sequential, numbered step-by-step instructions.
+                4. AVOID UNEXPLAINED JARGON: Assume no prior expertise. Keep code snippets minimal, clean, and heavily annotated with beginner-friendly comments.
+                """;
+            contentLength = "Write 350-480 words to provide thorough context, neat definitions, and guided explanations.";
+            sectionRequirements = """
+                Must include exactly these sections:
+                - ### 📖 Core Definitions & Foundational Concepts (clearly define each key term in bullet points)
+                - ### 💡 Real-World Analogy (a relatable everyday analogy making the concept click)
+                - ### 🛠️ Step-by-Step Practical Walkthrough (guided step-by-step explanation with a simple annotated code/command snippet)
+                """;
         } else if ("EXPERT".equalsIgnoreCase(level)) {
-            levelInstructions = "Target audience: EXPERT. Focus on high-level system architecture, engine internals, memory models, concurrency hazards, benchmark tradeoffs, and enterprise production edge cases.";
-            contentLength = "Write 140-220 words, assuming strong fundamentals and focusing on tradeoffs and production decisions.";
+            levelInstructions = """
+                TARGET AUDIENCE: EXPERT (Staff/Principal Engineer & Systems Architect)
+                TONE: Highly sophisticated, authoritative, high-level computer science vernacular, mathematically and architecturally rigorous.
+                MANDATORY REQUIREMENTS:
+                1. HIGH-LEVEL TECHNICAL VERNACULAR: Employ advanced engineering vocabulary (e.g. cache locality, amortized complexity, tail latency distribution, zero-copy buffers, consensus protocols, lock contention). Skip all basic definitions.
+                2. SYSTEMS & ENGINE INTERNALS: Delve deeply into runtime internals, JIT compilation, virtual memory management, thread synchronization primitives, and OS-level syscall overhead.
+                3. ENTERPRISE SCALE & FAILURE MODES: Analyze distributed resilience, CAP/PACELC tradeoffs, circuit breaker failure cascades, p99.99 SLA adherence, and observability telemetry.
+                """;
+            contentLength = "Write 280-400 words with dense, high-signal architectural depth and technical precision.";
+            sectionRequirements = """
+                Must include exactly these sections:
+                - ### 🏛️ System Architecture & Runtime Internals (deep dive into engine mechanics and memory/concurrency models)
+                - ### ⚡ High-Scale Performance Constraints & Failure Modes (critical edge cases, p99 latency tradeoffs, and failure mitigation)
+                """;
         } else {
-            levelInstructions = "Target audience: INTERMEDIATE. Focus on real-world practical patterns, architectural comparisons, code implementations, best practices, and debugging workflows.";
-            contentLength = "Write 200-280 words with practical guidance and one focused implementation example when useful.";
+            levelInstructions = """
+                TARGET AUDIENCE: INTERMEDIATE (Practicing Software Engineer)
+                TONE: Pragmatic, professional, code-focused, and industry-oriented.
+                MANDATORY REQUIREMENTS:
+                1. NO INTRODUCTORY DEFINITIONS: Assume standard programming syntax and core fundamentals are already well understood.
+                2. REAL-WORLD PRODUCTION PATTERNS: Focus on clean code patterns, modular architecture, state machines, and maintainable implementation workflows.
+                3. OPERATIONAL TRADEOFFS: Discuss practical edge cases, robust error handling, performance tuning, and debugging strategies.
+                """;
+            contentLength = "Write 260-360 words focusing on practical production code patterns and tradeoffs.";
+            sectionRequirements = """
+                Must include exactly these sections:
+                - ### ⚙️ Architecture Patterns & Implementation (production-ready design patterns and code structures)
+                - ### 🔍 Practical Tradeoffs & Debugging Workflows (common failure modes, performance considerations, and test strategies)
+                """;
         }
 
         String prompt = String.format("""
             You are a Principal Engineering Educator.
-            Generate concise educational study content and a mini-practice exercise for the following micro-learning module:
+            Generate educational study content and a mini-practice exercise for the following micro-learning module:
             
             Module Title: "%s"
             Competency: "%s"
@@ -79,25 +119,28 @@ public class ContentSynthesisService {
             Learning Objectives: %s
             
             %s
-            The Skill Level is a hard requirement. Do not use content aimed at another level.
-            NOVICE content must define terms, explain the why, use a simple analogy, and give step-by-step guidance.
-            INTERMEDIATE content must assume fundamentals and focus on practical patterns, implementation choices, debugging, and tradeoffs.
-            EXPERT content must skip basic definitions and focus on internals, architecture, performance constraints, failure modes, and production tradeoffs.
+            
+            %s
             
             Format your response strictly as JSON with this structure:
             {
-              "content": "Clean markdown content. %s Start directly with one short explanation, then use exactly two short sections with bullet points. Include one small code example only when it materially improves understanding. Do not repeat the module title, target level, competency, or learning objectives.",
+              "content": "Clean markdown content tailored strictly to the %s level. %s %s Do not repeat the module title or learning objectives.",
               "exercise": {
-                "question": "A multiple-choice question testing understanding of this specific module",
+                "question": "A multiple-choice question testing understanding tailored precisely for %s level",
                 "options": ["Option A", "Option B", "Option C", "Option D"],
                 "correctOptionIndex": 0,
                 "explanation": "Clear explanation of why this answer is correct."
               }
             }
             Return only valid JSON.
-            """, title, competency, level, module.getLearningObjectives(), levelInstructions, contentLength);
+            """, title, competency, level, module.getLearningObjectives(), levelInstructions, sectionRequirements, level, contentLength, sectionRequirements, level);
 
-        String response = aiGatewayService.generateContent("You are a technical education author. Output strict JSON only.", prompt);
+        String systemInstruction = String.format(
+            "You are a Principal Engineering Educator. You strictly calibrate content depth, pedagogical style, and technical vocabulary to match the '%s' skill level. Output strict JSON only.",
+            level.toUpperCase()
+        );
+
+        String response = aiGatewayService.generateContent(systemInstruction, prompt);
         String json = aiGatewayService.extractJson(response);
 
         if (json != null && !json.isBlank()) {
@@ -134,50 +177,76 @@ public class ContentSynthesisService {
     }
 
     private void generateFallbackContent(LearningModule module) {
-        String level = (module.getLevel() != null) ? module.getLevel() : "INTERMEDIATE";
+        String level = (module.getLevel() != null) ? module.getLevel() : "NOVICE";
         String comp = module.getCompetency();
 
         StringBuilder sb = new StringBuilder();
 
         if ("NOVICE".equalsIgnoreCase(level)) {
-            sb.append("Start with the basics: an API receives a request, performs a small amount of work, and returns a response. Keeping each step simple makes problems easier to find.\n\n");
-            sb.append("### Foundations\n\n");
-            sb.append("- Define each term before using it.\n");
-            sb.append("- Follow one request from input to response.\n");
-            sb.append("- Change one small thing at a time and test it.\n\n");
-            sb.append("### Guided Practice\n\n");
-            sb.append("Draw the request flow for one endpoint. Label where data enters, where it changes, and where the response is returned.");
+            sb.append("Welcome to ").append(module.getTitle()).append("! In this foundational guide, we break down core ideas into clear definitions and simple analogies.\n\n");
+            sb.append("### 📖 Core Definitions & Foundational Concepts\n\n");
+            sb.append("- **Input & Output**: Software takes information in (input), processes it with defined rules, and produces a result (output).\n");
+            sb.append("- **State**: The current condition or stored data of your application at any given moment.\n");
+            sb.append("- **Deterministic Execution**: Given the exact same input, code should reliably produce the exact same outcome every time.\n\n");
+            sb.append("### 💡 Real-World Analogy\n\n");
+            sb.append("Think of a software module like a kitchen recipe: the ingredients are your inputs, following the recipe steps in order is your algorithm, and the finished dish is your output. Keeping each recipe step simple ensures that anyone can follow it without burning the meal!\n\n");
+            sb.append("### 🛠️ Step-by-Step Practical Walkthrough\n\n");
+            sb.append("1. **Define the Goal**: State what one specific task your code should accomplish.\n");
+            sb.append("2. **Inspect the Data**: Trace variables step-by-step from beginning to end.\n");
+            sb.append("3. **Verify Early**: Test small pieces individually before connecting them into larger systems.");
         } else if ("EXPERT".equalsIgnoreCase(level)) {
-            sb.append("At expert level, API latency is a systems problem: queueing, connection reuse, serialization, downstream variance, and tail behavior must be measured together.\n\n");
-            sb.append("### Architecture Tradeoffs\n\n");
-            sb.append("- Track p95 and p99 latency separately from averages.\n");
-            sb.append("- Bound retries and isolate slow downstream dependencies.\n");
-            sb.append("- Compare pooling, batching, caching, and serialization changes with production traces.\n\n");
-            sb.append("### Production Review\n\n");
-            sb.append("Set a latency budget per dependency and verify that timeout, retry, and fallback policies preserve the end-to-end SLO.");
+            sb.append("At the systems architecture level, ").append(module.getTitle()).append(" requires optimizing for tail latency, concurrency safety, and failure isolation under adversarial load.\n\n");
+            sb.append("### 🏛️ System Architecture & Runtime Internals\n\n");
+            sb.append("- **Cache Locality & Amortized Overhead**: Minimize L1/L2 cache misses by aligning contiguous memory allocations and avoiding pointer-chasing indirections.\n");
+            sb.append("- **Non-Blocking I/O & Microtask Queues**: Saturate kernel epoll/kqueue event demultiplexers without blocking the event loop thread.\n");
+            sb.append("- **Consensus & State Synchronization**: Reconcile distributed partitions using Raft/Paxos state machines with bounded leader election timeouts.\n\n");
+            sb.append("### ⚡ High-Scale Performance Constraints & Failure Modes\n\n");
+            sb.append("Enforce strict p99.9 latency budgets by isolating downstream dependencies behind adaptive circuit breakers with exponential backoff and jitter.");
         } else {
-            sb.append("For intermediate engineers, improving API latency means measuring the request path and choosing targeted fixes rather than optimizing blindly.\n\n");
-            sb.append("### Applied Strategies\n\n");
-            sb.append("- Profile controller, database, network, and serialization time separately.\n");
-            sb.append("- Reuse connections and avoid repeated work in the request path.\n");
-            sb.append("- Add tests for normal, slow, and failed downstream responses.\n\n");
-            sb.append("### Practical Exercise\n\n");
-            sb.append("Trace one endpoint, record each step’s duration, and identify the single largest contributor before changing code.");
+            sb.append("For practicing engineers, ").append(module.getTitle()).append(" focuses on production design patterns, clean code principles, and real-world debugging workflows.\n\n");
+            sb.append("### ⚙️ Architecture Patterns & Implementation\n\n");
+            sb.append("- **Separation of Concerns**: Isolate business logic from presentation and transport layers.\n");
+            sb.append("- **Predictable Error Boundaries**: Handle rejected promises and exceptions gracefully with structured logging.\n");
+            sb.append("- **Idempotent Operations**: Ensure repeated operations produce identical side effects without corrupting persistent state.\n\n");
+            sb.append("### 🔍 Practical Tradeoffs & Debugging Workflows\n\n");
+            sb.append("Profile execution bottlenecks using browser DevTools or APM flame graphs before applying speculative micro-optimizations.");
         }
 
         module.setContent(sb.toString());
         module.setContentVersion(CONTENT_VERSION);
 
         module.setExercise(new Exercise(
-                "Based on the core principles discussed in this module, what is the primary recommendation for production maintainability?",
-                List.of(
-                        "Couple all logic into a single monolithic function for maximum speed",
-                        "Maintain clear separation of concerns, handle edge cases, and decouple state from side effects",
-                        "Ignore error boundaries since modern browsers and engines catch all faults",
-                        "Avoid writing tests to speed up the release cycle"
-                ),
-                1,
-                "Modular architecture with isolated side effects and clear boundaries is essential for maintainability and scalability."
+                "NOVICE".equalsIgnoreCase(level)
+                        ? "What is the primary benefit of breaking complex software tasks into small, clearly defined steps?"
+                        : "EXPERT".equalsIgnoreCase(level)
+                        ? "Which mechanism best prevents cascading failure across distributed microservices under high downstream tail latency?"
+                        : "What is the key advantage of maintaining separation of concerns in production applications?",
+                "NOVICE".equalsIgnoreCase(level)
+                        ? List.of(
+                                "It makes the system easier to understand, test, and debug",
+                                "It makes the computer run out of memory faster",
+                                "It forces all functions to be written on a single line",
+                                "It eliminates the need for any programming logic"
+                        )
+                        : "EXPERT".equalsIgnoreCase(level)
+                        ? List.of(
+                                "Adaptive circuit breaking with exponential backoff and jitter",
+                                "Unbounded retries sent in parallel to amplify network throughput",
+                                "Disabling health check probes to prevent CPU overhead",
+                                "Synchronously locking all threads until the slowest node responds"
+                        )
+                        : List.of(
+                                "Decoupling business logic enables easier maintenance, independent testing, and safer refactoring",
+                                "Combining all logic into one giant file increases execution velocity",
+                                "It prevents browsers from rendering CSS styles",
+                                "It removes the need to write unit or integration tests"
+                        ),
+                0,
+                "NOVICE".equalsIgnoreCase(level)
+                        ? "Breaking work down into simple, well-defined steps ensures problems are easy to locate and fix."
+                        : "EXPERT".equalsIgnoreCase(level)
+                        ? "Adaptive circuit breakers with backoff and jitter trip immediately when downstreams fail, protecting upstream thread pools from exhaustion."
+                        : "Separation of concerns isolates components so changes in one area don't trigger unexpected regressions elsewhere."
         ));
     }
 }

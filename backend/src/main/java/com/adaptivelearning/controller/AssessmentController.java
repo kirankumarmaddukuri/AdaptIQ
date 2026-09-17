@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/assessment")
+@RequestMapping({"/api/assessment", "/api/assessments", "/api/quiz", "/api/quizzes"})
 public class AssessmentController {
 
     private final AssessmentService assessmentService;

@@ -4,10 +4,8 @@ import com.adaptivelearning.model.*;
 import com.adaptivelearning.repository.DataStore;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 public class DashboardService {
@@ -17,11 +15,19 @@ public class DashboardService {
     public DashboardService(DataStore dataStore) {
         this.dataStore = dataStore;
     }
-
     public DashboardStats getDashboardData(String userId) {
-        User user = dataStore.getUser(userId);
+        User user = userId != null ? dataStore.getUser(userId) : null;
+        if (user == null && !dataStore.getUsers().isEmpty()) {
+            user = dataStore.getUser("user-demo-1");
+            if (user == null) {
+                user = dataStore.getUsers().values().iterator().next();
+            }
+        }
         if (user == null) {
-            user = dataStore.getUsers().values().iterator().next();
+            user = new User(userId != null ? userId : "user-demo-1", "demo@adaptiq.io", "Learner");
+            user.setRoleId("role-frontend-engineer");
+            user.setRoleName("Frontend Architect");
+            dataStore.saveUser(user);
         }
 
         DashboardStats stats = new DashboardStats();
@@ -78,8 +84,56 @@ public class DashboardService {
         // Points and streak
         int points = stats.getCompletedModulesCount() * 150 + user.getAssessmentHistory().size() * 300;
         stats.setSkillPoints(points);
-        stats.setLearningStreakDays(Math.max(1, stats.getCompletedModulesCount() / 2 + 1));
+        stats.setLearningStreakDays(calculateLearningStreak(user, history));
 
         return stats;
+    }
+
+    /**
+     * Calculates the daily learning streak based on distinct consecutive active calendar days.
+     * Completing multiple modules or assessments on the same day counts as 1 active day.
+     */
+    private int calculateLearningStreak(User user, List<ProgressRecord> history) {
+        Set<LocalDate> activeDates = new HashSet<>();
+
+        if (history != null) {
+            for (ProgressRecord pr : history) {
+                if (pr.getCompletedAt() != null) {
+                    activeDates.add(pr.getCompletedAt().toLocalDate());
+                }
+            }
+        }
+
+        if (user.getAssessmentHistory() != null) {
+            for (User.AssessmentHistoryItem ah : user.getAssessmentHistory()) {
+                if (ah.getTakenAt() != null) {
+                    activeDates.add(ah.getTakenAt().toLocalDate());
+                }
+            }
+        }
+
+        if (activeDates.isEmpty()) {
+            return 0;
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+
+        LocalDate checkDate;
+        if (activeDates.contains(today)) {
+            checkDate = today;
+        } else if (activeDates.contains(yesterday)) {
+            checkDate = yesterday;
+        } else {
+            return 0;
+        }
+
+        int streak = 0;
+        while (activeDates.contains(checkDate)) {
+            streak++;
+            checkDate = checkDate.minusDays(1);
+        }
+
+        return streak;
     }
 }

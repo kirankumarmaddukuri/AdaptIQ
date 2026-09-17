@@ -30,9 +30,15 @@ public class ProgressService {
 
         boolean passed = true;
         if (module.getExercise() != null) {
+            if (submittedExerciseIndex < 0) {
+                throw new IllegalArgumentException("Knowledge check quiz must be completed before submitting this module.");
+            }
             passed = (submittedExerciseIndex == module.getExercise().getCorrectOptionIndex());
+            if (!passed) {
+                throw new IllegalArgumentException("The quiz answer is incorrect. You must select the correct answer to complete this module.");
+            }
             module.getExercise().setSubmittedAnswer("Option " + (submittedExerciseIndex + 1));
-            module.getExercise().setPassed(passed);
+            module.getExercise().setPassed(true);
         }
 
         module.setStatus("COMPLETED");

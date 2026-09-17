@@ -1,38 +1,41 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --bg-primary: #080c14;
-  --bg-secondary: #0f172a;
-  --bg-card: rgba(18, 26, 44, 0.7);
-  --bg-card-hover: rgba(26, 38, 64, 0.85);
-  --bg-glass: rgba(15, 23, 42, 0.65);
+  --bg-primary: #120F17;
+  --bg-secondary: #1a1524;
+  --bg-card: rgba(26, 21, 35, 0.68);
+  --bg-card-hover: rgba(38, 30, 52, 0.85);
+  --bg-glass: rgba(18, 15, 23, 0.72);
   
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(99, 102, 241, 0.35);
-  --border-accent: rgba(139, 92, 246, 0.3);
+  --border-subtle: rgba(168, 85, 247, 0.16);
+  --border-glow: rgba(168, 85, 247, 0.42);
+  --border-accent: rgba(137, 106, 189, 0.45);
 
   --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-secondary: #c4b5fd;
+  --text-muted: #8b7ca8;
 
-  --accent-primary: #6366f1;
-  --accent-primary-hover: #4f46e5;
-  --accent-secondary: #8b5cf6;
-  --accent-cyan: #06b6d4;
+  --accent-primary: #a855f7;
+  --accent-primary-hover: #9333ea;
+  --accent-secondary: #896abd;
+  --accent-shard: #896abd;
+  --accent-cyan: #38bdf8;
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
   --accent-rose: #f43f5e;
 
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-  --gradient-cyan: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  --gradient-primary: linear-gradient(135deg, #896abd 0%, #a855f7 50%, #c084fc 100%);
+  --gradient-purple: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #d946ef 100%);
+  --gradient-cyan: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
   --gradient-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
   --gradient-amber: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  --gradient-card: linear-gradient(180deg, rgba(30, 41, 69, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+  --gradient-card: linear-gradient(180deg, rgba(38, 28, 54, 0.7) 0%, rgba(18, 15, 23, 0.85) 100%);
   
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 35px rgba(99, 102, 241, 0.25);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 35px rgba(168, 85, 247, 0.32);
+  --shadow-shard: 0 0 25px rgba(137, 106, 189, 0.35);
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -54,11 +57,6 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.6;
-  background-image: 
-    radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.04) 0%, transparent 60%);
-  background-attachment: fixed;
   overflow-x: hidden;
 }
 
@@ -71,9 +69,19 @@ select {
 }
 
 select option {
-  background: #111827;
+  background: #181322;
   color: #f8fafc;
   padding: 8px;
+}
+
+input, select, textarea {
+  transition: var(--transition-smooth);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.35) !important;
+  outline: none;
 }
 
 /* Glassmorphism Cards */
@@ -138,12 +146,12 @@ h1, h2, h3, h4 {
 .btn-primary {
   background: var(--gradient-primary);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.45);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+  box-shadow: 0 6px 24px rgba(168, 85, 247, 0.65);
 }
 
 .btn-secondary {
@@ -195,9 +203,9 @@ h1, h2, h3, h4 {
 }
 
 .badge-intermediate {
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
-  border: 1px solid rgba(99, 102, 241, 0.35);
+  background: rgba(168, 85, 247, 0.18);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.4);
 }
 
 .badge-expert {

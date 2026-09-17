@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = '/api';
 
 async function request(path, options = {}) {
   const url = `${API_BASE}${path}`;
@@ -11,7 +11,18 @@ async function request(path, options = {}) {
   };
 
   try {
-    const res = await fetch(url, config);
+    let res;
+    try {
+      res = await fetch(url, config);
+    } catch (networkErr) {
+      // Resilient fallback: try direct localhost:8080 if dev proxy was not ready
+      if (url.startsWith('/api')) {
+        res = await fetch(`http://localhost:8080${url}`, config);
+      } else {
+        throw networkErr;
+      }
+    }
+
     if (!res.ok) {
       const errorBody = await res.text();
       let message = errorBody || res.statusText;

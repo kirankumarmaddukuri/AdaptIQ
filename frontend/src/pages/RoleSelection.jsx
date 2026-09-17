@@ -27,9 +27,9 @@ export default function RoleSelection({ currentUser, modelName, onSelectRole }) 
 
   const getRoleIcon = (iconName) => {
     switch (iconName) {
-      case 'Layers': return <Layers size={28} color="#818cf8" />;
-      case 'Brain': return <Brain size={28} color="#d946ef" />;
-      default: return <Code size={28} color="#38bdf8" />;
+      case 'Layers': return <Layers size={28} color="#a855f7" />;
+      case 'Brain': return <Brain size={28} color="#c084fc" />;
+      default: return <Code size={28} color="#896abd" />;
     }
   };
 
@@ -39,7 +39,7 @@ export default function RoleSelection({ currentUser, modelName, onSelectRole }) 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
       <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', marginBottom: '12px' }}>
+        <span className="badge" style={{ background: 'rgba(168, 85, 247, 0.18)', color: '#c4b5fd', marginBottom: '12px' }}>
           Phase 2: Competency Alignment
         </span>
         <h1 style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '12px' }}>
@@ -61,7 +61,7 @@ export default function RoleSelection({ currentUser, modelName, onSelectRole }) 
             <select
               value={selectedRoleId}
               onChange={(event) => setSelectedRoleId(event.target.value)}
-              style={{ display: 'block', width: '100%', marginTop: '8px', padding: '12px 14px', borderRadius: '10px', background: '#111827', color: '#fff', border: '1px solid var(--border-subtle)', fontSize: '1rem', colorScheme: 'dark' }}
+              style={{ display: 'block', width: '100%', marginTop: '8px', padding: '12px 14px', borderRadius: '10px', background: '#1a1524', color: '#fff', border: '1px solid var(--border-subtle)', fontSize: '1rem', colorScheme: 'dark' }}
             >
               {roles.map(role => <option key={role.id} value={role.id}>{role.name}</option>)}
             </select>
@@ -172,7 +172,7 @@ export default function RoleSelection({ currentUser, modelName, onSelectRole }) 
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '20px',
-          background: 'linear-gradient(90deg, rgba(20, 30, 55, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%)'
+          background: 'linear-gradient(135deg, rgba(38, 28, 56, 0.85) 0%, rgba(18, 15, 23, 0.95) 100%)'
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>

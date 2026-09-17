@@ -91,7 +91,7 @@ export default function QuizView({ currentUser, activeRole, modelName, onAssessm
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: '24px',
-          boxShadow: '0 0 35px rgba(99, 102, 241, 0.4)'
+          boxShadow: '0 0 35px rgba(168, 85, 247, 0.45)'
         }}>
           <Brain size={36} color="#fff" className="animate-pulse-glow" />
         </div>
@@ -189,7 +189,7 @@ export default function QuizView({ currentUser, activeRole, modelName, onAssessm
                   : 'rgba(255, 255, 255, 0.1)',
                 cursor: 'pointer',
                 transition: 'background 0.2s',
-                boxShadow: isCurrent ? '0 0 10px rgba(99, 102, 241, 0.6)' : 'none'
+                boxShadow: isCurrent ? '0 0 10px rgba(168, 85, 247, 0.6)' : 'none'
               }}
             />
           );
@@ -231,14 +231,14 @@ export default function QuizView({ currentUser, activeRole, modelName, onAssessm
                   style={{
                     padding: '16px 20px',
                     borderRadius: 'var(--radius-md)',
-                    background: selected ? 'rgba(99, 102, 241, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                    background: selected ? 'rgba(168, 85, 247, 0.22)' : 'rgba(255, 255, 255, 0.03)',
                     border: `1.5px solid ${selected ? 'var(--accent-primary)' : 'var(--border-subtle)'}`,
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '14px',
                     transition: 'var(--transition-smooth)',
-                    boxShadow: selected ? '0 0 16px rgba(99, 102, 241, 0.25)' : 'none'
+                    boxShadow: selected ? '0 0 16px rgba(168, 85, 247, 0.3)' : 'none'
                   }}
                 >
                   <div style={{

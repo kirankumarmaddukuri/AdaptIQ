@@ -23,6 +23,28 @@ public class DataStore {
     @PostConstruct
     public void init() {
         seedRolesAndCompetencies();
+        seedDemoUser();
+    }
+
+    private void seedDemoUser() {
+        User demoUser = new User("user-demo-1", "demo@adaptiq.io", "Alex Chen");
+        demoUser.setRoleId("role-frontend-engineer");
+        demoUser.setRoleName("Frontend Architect");
+        demoUser.setOverallLevel("INTERMEDIATE");
+        demoUser.setCompetencyLevels(new HashMap<>(Map.of(
+                "HTML5 & Modern CSS", "EXPERT",
+                "JavaScript & TypeScript", "INTERMEDIATE",
+                "React & State Architecture", "INTERMEDIATE",
+                "Web Performance & Core Web Vitals", "NOVICE"
+        )));
+        demoUser.setCompetencyScores(new HashMap<>(Map.of(
+                "HTML5 & Modern CSS", 90,
+                "JavaScript & TypeScript", 75,
+                "React & State Architecture", 80,
+                "Web Performance & Core Web Vitals", 55
+        )));
+        users.put(demoUser.getId(), demoUser);
+        passwordsByUserId.put(demoUser.getId(), "demo1234");
     }
 
     private void seedRolesAndCompetencies() {
@@ -203,6 +225,10 @@ public class DataStore {
 
     public LearningModule getModule(String moduleId) {
         return modules.get(moduleId);
+    }
+
+    public Collection<LearningModule> getAllModules() {
+        return modules.values();
     }
 
     public void saveModule(LearningModule module) {

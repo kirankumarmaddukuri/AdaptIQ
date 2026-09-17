@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/learning-path")
+@RequestMapping({"/api/learning-path", "/api/learning-paths", "/api/learningpath"})
 public class LearningPathController {
 
     private final CurriculumService curriculumService;
@@ -24,9 +24,16 @@ public class LearningPathController {
         return ResponseEntity.ok(path);
     }
 
+    @GetMapping({"", "/"})
+    public ResponseEntity<LearningPath> getDefaultPath(@RequestParam(defaultValue = "user-demo-1") String userId) {
+        LearningPath path = curriculumService.getPathForUser(userId);
+        return ResponseEntity.ok(path);
+    }
+
     @GetMapping("/{userId}")
     public ResponseEntity<LearningPath> getPath(@PathVariable String userId) {
         LearningPath path = curriculumService.getPathForUser(userId);
         return ResponseEntity.ok(path);
     }
 }
+
