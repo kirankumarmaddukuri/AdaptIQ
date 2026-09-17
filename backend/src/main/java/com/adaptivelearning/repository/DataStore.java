@@ -184,30 +184,65 @@ public class DataStore {
                 "Fine-tuning evaluation pipelines, hybrid semantic search, Agentic function calling, guardrails."
         ));
 
-        // Roles
-        addRole("role-frontend-engineer", "Frontend Architect", "Frontend Engineering", "Designs high-performance, accessible, and scalable web interfaces using modern frameworks and performance optimization.", "Code", List.of("HTML5 & Modern CSS", "JavaScript & TypeScript", "React & State Architecture", "Web Performance & Core Web Vitals"));
-        addRole("role-fullstack-cloud", "Full Stack Cloud Developer", "Software Engineering", "Builds end-to-end resilient applications spanning modern React frontends, robust Spring Boot APIs, and cloud microservices.", "Layers", List.of("JavaScript & TypeScript", "React & State Architecture", "Cloud APIs & Microservices", "Web Performance & Core Web Vitals"));
-        addRole("role-ai-engineer", "AI & Prompt Systems Engineer", "Artificial Intelligence", "Integrates generative AI models, builds intelligent agent workflows, and automates context-aware enterprise systems.", "Brain", List.of("AI Engineering & LLM Integration", "JavaScript & TypeScript", "Cloud APIs & Microservices"));
-        addRole("role-backend-engineer", "Backend Engineer", "Software Engineering", "Builds reliable APIs, services, and data access layers.", "Code", List.of("Cloud APIs & Microservices", "JavaScript & TypeScript", "AI Engineering & LLM Integration"));
-        addRole("role-java-developer", "Java Developer", "Software Engineering", "Develops maintainable Java services with Spring Boot and production testing practices.", "Code", List.of("Cloud APIs & Microservices", "JavaScript & TypeScript", "Web Performance & Core Web Vitals"));
-        addRole("role-devops-engineer", "DevOps Engineer", "Cloud Engineering", "Automates delivery, observability, reliability, and scalable cloud operations.", "Layers", List.of("Cloud APIs & Microservices", "Web Performance & Core Web Vitals", "AI Engineering & LLM Integration"));
-        addRole("role-data-engineer", "Data Engineer", "Data Engineering", "Designs dependable data pipelines and systems for analytics and intelligent products.", "Layers", List.of("Cloud APIs & Microservices", "AI Engineering & LLM Integration", "JavaScript & TypeScript"));
-        addRole("role-qa-engineer", "QA Automation Engineer", "Quality Engineering", "Creates automated test strategies that protect product quality across web and API workflows.", "Code", List.of("JavaScript & TypeScript", "Cloud APIs & Microservices", "Web Performance & Core Web Vitals"));
-        addRole("role-security-engineer", "Security Engineer", "Security Engineering", "Builds secure application and service architectures with practical threat controls.", "Brain", List.of("Cloud APIs & Microservices", "JavaScript & TypeScript", "AI Engineering & LLM Integration"));
-        addRole("role-product-engineer", "Product Engineer", "Product Engineering", "Turns user needs into polished, measurable, and maintainable product experiences.", "Code", List.of("React & State Architecture", "JavaScript & TypeScript", "Web Performance & Core Web Vitals"));
+            addCompetency(new Competency(
+                "comp-data-modeling",
+                "SQL & Data Modeling",
+                "SQL querying, relational design, normalization, dimensional modeling, and data quality constraints.",
+                "Basic SELECT queries, filters, joins, and primary keys.",
+                "Aggregations, window functions, normalization, indexes, and star-schema design.",
+                "Query plans, partitioning, slowly changing dimensions, and advanced dimensional modeling."
+            ));
 
-        // Persist initial competencies and roles into MongoDB if not present
+            addCompetency(new Competency(
+                "comp-data-pipelines",
+                "ETL & Data Pipelines",
+                "Reliable batch and streaming pipelines, data ingestion, transformations, orchestration, and data quality.",
+                "Load files into a database and perform basic transformations.",
+                "Orchestrated incremental loads, validation, retries, and dependency management.",
+                "Idempotent distributed processing, late-arriving data, replay, and exactly-once tradeoffs."
+            ));
+
+            addCompetency(new Competency(
+                "comp-snowflake",
+                "Snowflake & Cloud Data Warehousing",
+                "Snowflake architecture, virtual warehouses, storage and compute separation, security, and cost-aware analytics.",
+                "Databases, schemas, tables, and basic Snowflake queries.",
+                "Virtual warehouses, stages, file loading, roles, and workload isolation.",
+                "Clustering, time travel, streams/tasks, resource monitors, and query optimization."
+            ));
+
+            addCompetency(new Competency(
+                "comp-power-bi",
+                "Power BI & Analytics",
+                "Power BI data modeling, DAX, semantic models, dashboards, reporting, and business analytics.",
+                "Import data, create visuals, and build basic reports.",
+                "Star schemas, relationships, measures, filters, and dashboard design.",
+                "DAX evaluation context, row-level security, incremental refresh, and model performance."
+            ));
+
+        // Roles
+        addRole("role-frontend-engineer", "Frontend Architect", "Frontend Engineering", "Designs accessible web interfaces with semantic HTML, modern CSS, TypeScript, React, and browser performance optimization.", "Code", List.of("HTML5 & Modern CSS", "JavaScript & TypeScript", "React & State Architecture", "Web Performance & Core Web Vitals"));
+        addRole("role-fullstack-cloud", "Full Stack Cloud Developer", "Software Engineering", "Builds React frontends, Spring Boot APIs, authenticated services, Docker images, and resilient cloud microservices.", "Layers", List.of("JavaScript & TypeScript", "React & State Architecture", "Cloud APIs & Microservices", "Web Performance & Core Web Vitals"));
+        addRole("role-ai-engineer", "AI & Prompt Systems Engineer", "Artificial Intelligence", "Builds Gemini and LLM integrations using prompt engineering, RAG, embeddings, agents, structured output, evaluation, and safety controls.", "Brain", List.of("AI Engineering & LLM Integration", "JavaScript & TypeScript", "Cloud APIs & Microservices"));
+        addRole("role-backend-engineer", "Backend Engineer", "Software Engineering", "Builds scalable REST APIs and services with Spring Boot or Node.js, databases, authentication, testing, and observability.", "Code", List.of("Cloud APIs & Microservices", "JavaScript & TypeScript", "AI Engineering & LLM Integration"));
+        addRole("role-java-developer", "Java Developer", "Software Engineering", "Develops Java and Spring Boot services using object-oriented design, concurrency, persistence, REST APIs, testing, and JVM performance practices.", "Code", List.of("Cloud APIs & Microservices", "JavaScript & TypeScript", "Web Performance & Core Web Vitals"));
+        addRole("role-devops-engineer", "DevOps Engineer", "Cloud Engineering", "Automates CI/CD, Docker and Kubernetes delivery, infrastructure as code, monitoring, logging, reliability, and deployment strategies.", "Layers", List.of("Cloud APIs & Microservices", "Web Performance & Core Web Vitals", "AI Engineering & LLM Integration"));
+        addRole("role-data-engineer", "Data Engineer", "Data Engineering", "Designs dependable data pipelines and systems for analytics and intelligent products.", "Layers", List.of("SQL & Data Modeling", "ETL & Data Pipelines", "Snowflake & Cloud Data Warehousing", "Power BI & Analytics"));
+        addRole("role-qa-engineer", "QA Automation Engineer", "Quality Engineering", "Creates automated web and API tests with Playwright or Selenium, fixtures, mocking, regression coverage, and CI quality gates.", "Code", List.of("JavaScript & TypeScript", "Cloud APIs & Microservices", "Web Performance & Core Web Vitals"));
+        addRole("role-security-engineer", "Security Engineer", "Security Engineering", "Builds secure systems using threat modeling, OWASP controls, OAuth2 and JWT, secrets management, encryption, and cloud security.", "Brain", List.of("Cloud APIs & Microservices", "JavaScript & TypeScript", "AI Engineering & LLM Integration"));
+        addRole("role-product-engineer", "Product Engineer", "Product Engineering", "Turns user needs into accessible React experiences with API integration, analytics, experimentation, and maintainable delivery.", "Code", List.of("React & State Architecture", "JavaScript & TypeScript", "Web Performance & Core Web Vitals"));
+
+        // Keep the built-in role and competency catalog synchronized with MongoDB.
         try {
-            if (competencyRepository != null && competencyRepository.count() == 0) {
+            if (competencyRepository != null) {
                 competencyRepository.saveAll(new HashSet<>(competencies.values()));
-                logger.info("Seeded competencies into MongoDB Atlas.");
             }
-            if (roleRepository != null && roleRepository.count() == 0) {
+            if (roleRepository != null) {
                 roleRepository.saveAll(roles.values());
-                logger.info("Seeded roles into MongoDB Atlas.");
             }
+            logger.info("Synchronized built-in roles and competencies with MongoDB Atlas.");
         } catch (Exception e) {
-            logger.warn("Could not seed roles/competencies to MongoDB: {}", e.getMessage());
+            logger.warn("Could not synchronize roles/competencies to MongoDB: {}", e.getMessage());
         }
     }
 
